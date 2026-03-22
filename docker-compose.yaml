@@ -1,0 +1,93 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: automatic_kyc_postgres
+    restart: always
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "automatic_kyc", "-d", "automatic_kyc_db" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+    environment:
+      POSTGRES_USER: automatic_kyc
+      POSTGRES_PASSWORD: automatic_kyc_password
+      POSTGRES_DB: automatic_kyc_db
+    ports:
+      - "5440:5432"
+    volumes:
+      - automatic_kyc_postgres_data:/var/lib/postgresql/data
+    networks:
+      - automatic_kyc_network
+  rabbitmq:
+    image: rabbitmq:3.10-management
+    container_name: automatic_kyc_rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
+      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE:-mysecretcookie}
+      # Enable Prometheus metrics
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: "-rabbitmq_prometheus true"
+    ports:
+      - "5674:5672"     # AMQP client connections
+      - "15674:15672"   # Management UI
+      - "15694:15692"   # Prometheus metrics
+    volumes:
+      - automatic_kyc_rabbitmq_data:/var/lib/rabbitmq
+      - automatic_kyc_rabbitmq_logs:/var/log/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "status" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - automatic_kyc_network
+
+  minio:
+    image: minio/minio
+    container_name: automatic_kyc_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    ports:
+      - "9002:9000"   # S3 API
+      - "9001:9001"   # Web console
+    volumes:
+      - automatic_kyc_minio_data:/data
+    healthcheck:
+      test: [ "CMD", "mc", "ready", "local" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - automatic_kyc_network
+
+  minio-init:
+    image: minio/mc
+    container_name: automatic_kyc_minio_init
+    restart: "no"
+    depends_on:
+      minio:
+        condition: service_healthy
+    volumes:
+      - ./minio-policy.json:/tmp/minio-policy.json
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://minio:9000 minioadmin minioadmin &&
+        mc mb --ignore-existing local/automatic-kyc-localhost &&
+        mc anonymous set-json /tmp/minio-policy.json local/automatic-kyc-localhost &&
+        echo 'MinIO setup complete'
+      "
+    networks:
+      - automatic_kyc_network
+
+volumes:
+  automatic_kyc_postgres_data:
+  automatic_kyc_rabbitmq_data:
+  automatic_kyc_rabbitmq_logs:
+  automatic_kyc_minio_data:
+
+networks:
+  automatic_kyc_network:

@@ -1,0 +1,97 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  application:
+    name: automatic-kyc-api
+  datasource:
+    url: ${DATABASE_URL:}
+    username: ${DATABASE_USERNAME:}
+    password: ${DATABASE_PASSWORD:}
+  jpa:
+    database: postgresql
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc.lob.non_contextual_creation: true
+    hibernate.ddl-auto: update
+  flyway:
+    enabled: false
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASS:guest}
+    listener:
+      simple:
+        acknowledge-mode: auto
+
+storage:
+  s3:
+    access-key-id: ${S3_ACCESS_KEY_ID:}
+    secret-access-key: ${S3_SECRET_ACCESS_KEY:}
+    bucket: ${S3_BUCKET:}
+    region: ${S3_REGION:us-east-1}
+    endpoint: ${S3_ENDPOINT:}
+    public-base-url: ${S3_PUBLIC_BASE_URL:}
+
+api:
+  instanceId: api-1
+
+app:
+  env: ${APP_ENV:dev}
+  jwt:
+    secret: ${JWT_SECRET_KEY:}
+    issuer: ${JWT_ISSUER:}
+    accessTtlMinutes: ${JWT_ACCESS_TTL_MINUTES:120}
+    rememberTtlMinutes: ${JWT_REMEMBER_TTL_MINUTES:10080}
+    cookieName: AUTH_TOKEN
+    sameSite: Lax
+  cors:
+    allowedOrigins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+  bootstrap:
+    enabled: ${APP_BOOTSTRAP_ENABLED:false}
+    admin-email: ${APP_BOOTSTRAP_ADMIN_EMAIL:}
+    admin-password: ${APP_BOOTSTRAP_ADMIN_PASSWORD:}
+    admin-given-name: ${APP_BOOTSTRAP_ADMIN_GIVEN_NAME:Root}
+    admin-family-name: ${APP_BOOTSTRAP_ADMIN_FAMILY_NAME:User}
+    admin-role-name: ${APP_BOOTSTRAP_ADMIN_ROLE_NAME:OWNER}
+    admin-role-scope: ${APP_BOOTSTRAP_ADMIN_ROLE_SCOPE:PROVIDER}
+    authz:
+      enabled: ${APP_BOOTSTRAP_AUTHZ_ENABLED:true}
+    test-tenant:
+      slug: ${APP_BOOTSTRAP_TEST_TENANT_SLUG:test-tenant}
+      name: ${APP_BOOTSTRAP_TEST_TENANT_NAME:Test Tenant}
+    test-verification:
+      enabled: ${APP_BOOTSTRAP_TEST_VERIFICATION_ENABLED:false}
+      doc-type: ${APP_BOOTSTRAP_TEST_VERIFICATION_DOC_TYPE:passport}
+      front-image-path: ${APP_BOOTSTRAP_TEST_VERIFICATION_FRONT_IMAGE_PATH:}
+      back-image-path: ${APP_BOOTSTRAP_TEST_VERIFICATION_BACK_IMAGE_PATH:}
+      liveness-image-paths: ${APP_BOOTSTRAP_TEST_VERIFICATION_LIVENESS_IMAGE_PATHS:}
+      first-name: ${APP_BOOTSTRAP_TEST_VERIFICATION_FIRST_NAME:Test}
+      last-name: ${APP_BOOTSTRAP_TEST_VERIFICATION_LAST_NAME:User}
+      date-of-birth: ${APP_BOOTSTRAP_TEST_VERIFICATION_DATE_OF_BIRTH:1990-01-15}
+      country-of-residence: ${APP_BOOTSTRAP_TEST_VERIFICATION_COUNTRY_OF_RESIDENCE:CZE}
+  encryption:
+    master-key: ${APP_ENCRYPTION_MASTER_KEY:}
+  webhooks:
+    dispatcher:
+      enabled: ${APP_WEBHOOKS_DISPATCHER_ENABLED:true}
+      poll-ms: ${APP_WEBHOOKS_DISPATCHER_POLL_MS:3000}
+      batch-size: ${APP_WEBHOOKS_DISPATCHER_BATCH_SIZE:25}
+      max-attempts: ${APP_WEBHOOKS_DISPATCHER_MAX_ATTEMPTS:6}
+      base-delay-ms: ${APP_WEBHOOKS_DISPATCHER_BASE_DELAY_MS:1000}
+      max-delay-ms: ${APP_WEBHOOKS_DISPATCHER_MAX_DELAY_MS:60000}
+      connect-timeout-ms: ${APP_WEBHOOKS_DISPATCHER_CONNECT_TIMEOUT_MS:3000}
+      request-timeout-ms: ${APP_WEBHOOKS_DISPATCHER_REQUEST_TIMEOUT_MS:10000}
+
+logging:
+  level:
+    org.springframework: INFO
+

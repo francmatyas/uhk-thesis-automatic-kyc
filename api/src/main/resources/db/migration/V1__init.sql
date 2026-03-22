@@ -1,0 +1,1 @@
+-- Baseline migration. Replace with real DDL for initial schema.

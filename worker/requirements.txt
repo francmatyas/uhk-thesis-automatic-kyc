@@ -1,0 +1,8 @@
+aio-pika>=9.4.0
+rapidfuzz>=3.0.0
+python-dotenv>=1.0.0
+PassportEye>=2.2.0
+opencv-python-headless>=4.8.0
+pytest>=8.0.0
+zxing-cpp>=2.2.0
+mediapipe>=0.10.0
