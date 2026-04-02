@@ -1,0 +1,553 @@
+shared:
+  table:
+    unableToLoadData: Unable to load data
+    accessDenied: Access denied
+    somethingWentWrong: Something went wrong
+    permissionDenied: Permission denied
+    noResults: No results found
+    noDataForFilter: No data available for selected filters
+    search: Search...
+    filterableColumns: Filterable columns
+    filterByColumns: Filter by columns
+  resourceDetail:
+    errorPrefix: Error
+    actions:
+      create: Create
+      saveChanges: Save Changes
+      delete: Delete
+  relationField:
+    empty: "—"
+    openDetail: Open detail
+    change: Change
+    clear: Clear
+    searchPlaceholder: Search...
+
+menu:
+  provider:
+    dashboard: Dashboard
+    verifications: Verifications
+    journeyTemplates: Journey Templates
+    management: Management
+    users: Users
+    tenants: Tenants
+    roles: Roles
+    permissions: Permissions
+    auditLogs: Audit Logs
+  tenant:
+    dashboard: Dashboard
+    verifications: Verifications
+    journeyTemplates: Journey Templates
+    administration: Administration
+    teamSettings: Team Settings
+    members: Members
+    apiKeys: API Keys
+    webhooks: Webhooks
+    auditLogs: Audit Logs
+
+sidebar:
+  userMenu:
+    profile: Profile
+    settings: Settings
+    logout: Log out
+  tenantSwitch:
+    provider: Provider
+    tenant: Tenant
+    fallbackInitial: T
+    tenantWorkspace: Tenant Workspace
+    providerWorkspace: Provider Workspace
+    switchWorkspace: Switch Workspace
+    switchFailed: Failed to switch scope. Please try again.
+  groups:
+    title: Groups
+    expand: Expand
+    collapse: Collapse
+    loadFailed: Failed to load groups.
+    retry: Retry
+    allItems: "All {{module}}"
+    empty: No groups found.
+    createNew: Create New Group
+    newGroup: New Group
+    context:
+      pin: Pin
+      unpin: Unpin
+      edit: Edit
+      delete: Delete
+    dialog:
+      editTitle: Edit Group
+      newTitle: New Group
+      editDescription: Edit the group to organize your {{module}}.
+      createDescription: Create a new group to organize your {{module}}.
+      groupNamePlaceholder: Group Name
+      saveChanges: Save Changes
+      create: Create
+
+moduleDefinitions:
+  auditLogs:
+    search: Search audit logs...
+    columns:
+      event: Event
+      time: Time
+      actor: Actor
+      entity: Entity
+      result: Result
+    detailFields:
+      action: Action
+      actorType: Actor Type
+      entityType: Entity Type
+      status: Status
+      result: Result
+      errorCode: Error Code
+      timestamp: Timestamp
+    enums:
+      result:
+        success: Success
+        failure: Failure
+      actor:
+        user: User
+        system: System
+        api_key: API key
+        service: Service
+  roles:
+    search: Search roles...
+    createLabel: New Role
+    actions:
+      create: Create Role
+      save: Save Changes
+      delete: Delete
+    columns:
+      scope: Scope
+      name: Name
+      description: Description
+    detailFields:
+      scope: Scope
+      name: Name
+      description: Description
+      resource: Resource
+      action: Action
+    permissionsMatrix:
+      label: Permissions
+      searchPlaceholder: Search modules...
+      module: Module
+      loading: Loading permissions...
+      noModules: No modules found.
+      actions:
+        create: Create
+        read: Read
+        update: Update
+        delete: Delete
+    enums:
+      scope:
+        provider: Provider
+        tenant: Tenant
+      action:
+        create: Create
+        read: Read
+        update: Update
+        delete: Delete
+    messages:
+      confirmDelete: Are you sure you want to delete this role?
+      success:
+        create: Role created successfully.
+        update: Role updated successfully.
+        remove: Role deleted successfully.
+      error:
+        save: Failed to save role.
+        remove: Failed to delete role.
+  permissions:
+    search: Search permissions...
+    createLabel: New Permission
+    actions:
+      create: Create Permission
+      save: Save Changes
+      delete: Delete
+    columns:
+      resource: Resource
+      action: Action
+      description: Description
+    detailFields:
+      resource: Resource
+      action: Action
+      description: Description
+    enums:
+      action:
+        create: Create
+        read: Read
+        update: Update
+        delete: Delete
+    messages:
+      confirmDelete: Are you sure you want to delete this permission?
+      success:
+        create: Permission created successfully.
+        update: Permission updated successfully.
+        remove: Permission deleted successfully.
+      error:
+        save: Failed to save permission.
+        remove: Failed to delete permission.
+  users:
+    search: Search users...
+    actions:
+      create: Create User
+      save: Save Changes
+      delete: Delete
+    columns:
+      name: Name
+      email: Email
+      gender: Gender
+    detailFields:
+      givenName: Given Name
+      familyName: Family Name
+      email: Email
+      gender: Gender
+    enums:
+      gender:
+        male: Male
+        female: Female
+        other: Other
+    messages:
+      confirmDelete: Are you sure you want to delete this user?
+      success:
+        create: User created successfully.
+        update: User updated successfully.
+        remove: User deleted successfully.
+      error:
+        save: Failed to save user.
+        remove: Failed to delete user.
+  tenants:
+    search: Search tenants...
+    createLabel: New Tenant
+    actions:
+      create: Create Tenant
+      save: Save Changes
+      delete: Delete
+    columns:
+      name: Name
+      slug: Slug
+      status: Status
+    detailFields:
+      name: Name
+      slug: Slug
+      status: Status
+    enums:
+      status:
+        active: Active
+        suspended: Suspended
+    messages:
+      confirmDelete: Are you sure you want to delete this tenant?
+      success:
+        create: Tenant created successfully.
+        update: Tenant updated successfully.
+        remove: Tenant deleted successfully.
+      error:
+        save: Failed to save tenant.
+        remove: Failed to delete tenant.
+  tenantMe:
+    actions:
+      save: Save Changes
+    columns:
+      name: Name
+      slug: Slug
+    detailFields:
+      name: Name
+      slug: Slug
+    messages:
+      confirmDelete: Deleting tenant settings is not supported.
+      success:
+        create: Team settings saved successfully.
+        update: Team settings updated successfully.
+        remove: Team settings removed successfully.
+      error:
+        save: Failed to save team settings.
+        remove: Failed to remove team settings.
+    membersSection:
+      title: Members
+      searchUser: Search user
+      rolesOptional: Roles (optional)
+      selectRoles: Select roles
+      noMembers: No members
+      default: Default
+      validation:
+        selectUserFirst: Select a user first.
+        userAlreadyAdded: This user is already in the member list.
+  verifications:
+    search: Search verifications...
+    columns:
+      clientIdentity: Client Identity
+      status: Status
+      tenant: Tenant
+      journeyTemplate: Journey Template
+      expiresAt: Expires At
+      completedAt: Completed At
+      createdAt: Created At
+    detailFields:
+      tenant: Tenant
+      journeyTemplate: Journey Template
+      expiresAt: Expires At
+      completedAt: Completed At
+      createdAt: Created At
+    enums:
+      status:
+        initiated: Initiated
+        inProgress: In Progress
+        readyForAutoCheck: Ready for Auto Check
+        autoPassed: Auto Passed
+        autoFailed: Auto Failed
+        requiresReview: Requires Review
+        approved: Approved
+        rejected: Rejected
+        expired: Expired
+    verificationDetail:
+      clientIdentity:
+        title: Client Identity
+        passport: Passport
+        czechRepublic: Czech Republic
+        identityCard: Identity Card
+        front: Front
+        back: Back
+        values:
+          passport: P
+        fields:
+          surname: Surname
+          passportNo: Passport No.
+          givenNames: Given Names
+          personalNo: Personal No.
+          nationality: Nationality
+          sex: Sex
+          type: Type
+          dateOfBirth: Date of Birth
+          expiry: Expiry
+          cardNo: Card No.
+          validUntil: Valid Until
+          placeOfBirth: Place of Birth
+          nationalNo: National No.
+          address: Address
+          countryOfResidence: Country of Residence
+      steps:
+        title: Verification Steps
+        score: Score
+        stepStatus:
+          COMPLETED: Completed
+          FAILED: Failed
+          PENDING: Pending
+          SKIPPED: Skipped
+          WARNING: Warning
+        checkStatus:
+          PASSED: Passed
+          FAILED: Failed
+          PENDING: Pending
+          ERROR: Error
+          WARNING: Warning
+        stepType:
+          personalInfo: Personal Info
+          docOcr: Document OCR
+          faceMatch: Face Match
+          livenessDetection: Liveness Detection
+          amlScreening: AML Screening
+          amlQuestionnaire: AML Questionnaire
+          emailVerification: Email Verification
+          phoneVerification: Phone Verification
+        checkType:
+          personalInfo: Personal Info
+          docDataMatch: Document Data Match
+          docOcr: Document OCR
+          faceMatch: Face Match
+          liveness: Liveness
+          sanctions: Sanctions
+          pep: PEP
+          emailVerification: Email Verification
+          phoneVerification: Phone Verification
+          amlQuestionnaire: AML Questionnaire
+      riskScore:
+        title: Risk Score
+        overallScore: Overall Score
+        level: Risk Level
+        weightedAverage: Weighted Average
+        levels:
+          LOW: Low
+          MEDIUM: Medium
+          HIGH: High
+      statusTimeline:
+        initiated: Initiated
+        inProgress: In Progress
+        autoCheck: Auto Check
+        autoPassed: Auto Passed
+        autoFailed: Auto Failed
+        inReview: In Review
+        approved: Approved
+        rejected: Rejected
+        expired: Expired
+  journeyTemplates:
+    search: Search journey templates...
+    createLabel: New Template
+    actions:
+      create: Create Template
+      save: Save Changes
+      delete: Delete
+    columns:
+      name: Name
+      status: Status
+      tenant: Tenant
+      createdAt: Created At
+    detailFields:
+      id: ID
+      name: Name
+      status: Status
+      description: Description
+      configJson: Configuration JSON
+    configJsonEditor:
+      labels:
+        allowedDocumentTypes: Allowed Document Types
+        optionalSteps: Optional Steps
+      documentTypes:
+        czechId: Czech ID
+        passport: Passport
+      optionalSteps:
+        emailVerification: Email Verification
+        phoneVerification: Phone Verification
+        amlQuestionnaire: AML Questionnaire
+      noneConfigured: None configured
+      toggleHint: Click to toggle options on or off
+    enums:
+      status:
+        active: Active
+        archived: Archived
+    messages:
+      confirmDelete: Are you sure you want to delete this journey template?
+      success:
+        create: Journey template created successfully.
+        update: Journey template updated successfully.
+        remove: Journey template deleted successfully.
+      error:
+        save: Failed to save journey template.
+        remove: Failed to delete journey template.
+  apiKeys:
+    search: Search API keys...
+    createLabel: New API Key
+    actions:
+      create: Create API Key
+      save: Save Changes
+      delete: Delete
+    columns:
+      name: Name
+      status: Status
+      publicKey: Public Key
+      lastUsedAt: Last Used At
+      createdAt: Created At
+    detailFields:
+      name: Name
+      status: Status
+      publicKey: Public Key
+      lastUsedAt: Last Used At
+      createdAt: Created At
+    enums:
+      status:
+        active: Active
+        revoked: Revoked
+    messages:
+      confirmDelete: Are you sure you want to revoke this API key?
+      success:
+        create: API key created successfully.
+        update: API key updated successfully.
+        remove: API key revoked successfully.
+      error:
+        save: Failed to save API key.
+        remove: Failed to revoke API key.
+    createWizard:
+      trigger: New API Key
+      dialog:
+        title: Create API Key
+        description: Enter a name. You will see the secret exactly once after creation.
+      fields:
+        name: Name
+        namePlaceholder: e.g. My Application Key
+      actions:
+        cancel: Cancel
+        create: Create
+        close: Close
+        openDetail: Open Detail
+      validation:
+        nameRequired: API key name is required.
+      created:
+        title: Store Your API Secret Now
+        description: This secret is shown only once and will not be visible again.
+        publicKey: Public Key
+        secret: Secret
+        notReturned: Not returned by API
+      toasts:
+        errorCreate: Failed to create API key. Please try again.
+  webhooks:
+    search: Search webhooks...
+    createLabel: New Webhook
+    actions:
+      create: Create Webhook
+      save: Save Changes
+      delete: Delete
+    columns:
+      url: URL
+      status: Status
+      lastDeliveryAt: Last Delivery At
+      createdAt: Created At
+    detailFields:
+      url: URL
+      status: Status
+      lastDeliveryAt: Last Delivery At
+      createdAt: Created At
+    enums:
+      status:
+        active: Active
+        disabled: Disabled
+    messages:
+      confirmDelete: Are you sure you want to delete this webhook?
+      success:
+        create: Webhook created successfully.
+        update: Webhook updated successfully.
+        remove: Webhook deleted successfully.
+      error:
+        save: Failed to save webhook.
+        remove: Failed to delete webhook.
+    createWizard:
+      trigger: New Webhook
+      dialog:
+        title: Create Webhook
+        description: Enter the target URL and signing secret.
+      fields:
+        url: URL
+        urlPlaceholder: https://example.com/webhooks/endpoint
+        secret: Secret
+        secretPlaceholder: whsec_...
+        secretHint: Secret length must be between 16 and 255 characters.
+        eventTypes: Event types
+        noEventTypes: No event types available.
+      actions:
+        cancel: Cancel
+        create: Create
+        close: Close
+        openDetail: Open Detail
+      validation:
+        urlRequired: Webhook URL is required.
+        secretRequired: Webhook secret is required.
+        secretLength: Webhook secret must be between 16 and 255 characters.
+        eventTypeRequired: Select at least one event type.
+      created:
+        title: Webhook Created
+        description: Your webhook has been created successfully.
+      toasts:
+        errorCreate: Failed to create webhook. Please try again.
+  members:
+    search: Search members...
+    actions:
+      save: Save Changes
+    columns:
+      name: Name
+      email: Email
+    detailFields:
+      givenName: Given Name
+      familyName: Family Name
+      email: Email
+    messages:
+      confirmDelete: Removing members is not supported.
+      success:
+        update: Member updated successfully.
+      error:
+        save: Failed to save member.
+  sectionTitle:
+    tenant: Tenant

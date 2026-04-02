@@ -6,7 +6,13 @@ import java.util.Optional;
 
 public enum WebhookEventType {
     DOCUMENT_READY("document.ready"),
-    DOCUMENT_DELETED("document.deleted");
+    DOCUMENT_DELETED("document.deleted"),
+    VERIFICATION_COMPLETED("verification.completed"),
+    VERIFICATION_FAILED("verification.failed"),
+    VERIFICATION_REQUIRES_REVIEW("verification.requires_review"),
+    VERIFICATION_APPROVED("verification.approved"),
+    VERIFICATION_REJECTED("verification.rejected"),
+    VERIFICATION_EXPIRED("verification.expired");
 
     private final String eventName;
 

@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import {
   flexRender,
@@ -22,7 +23,6 @@ import {
   ArrowDownNarrowWide,
   ArrowUpWideNarrow,
   Search,
-  Info,
   CircleHelp,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -40,6 +40,7 @@ import { TooltipSimple } from "@/components/ui/tooltip";
 import { ControlBar } from "@/views/ControlBar";
 
 export function DataTable({
+  module,
   data,
   loading,
   error,
@@ -55,14 +56,24 @@ export function DataTable({
   buttons = [],
   translations,
 }) {
+  const { t } = useTranslation();
+  const tr = (value) =>
+    typeof value === "string" ? t(value, { defaultValue: value }) : value;
+  const hasTranslation = (key) => {
+    if (typeof key !== "string" || key.length === 0) return false;
+    return t(key, { defaultValue: "__MISSING_TRANSLATION__" }) !== "__MISSING_TRANSLATION__";
+  };
   const { tenantSlug } = useParams();
   const prepared = processTableData({
     columns: data?.columns || [],
     rows: data?.rows || [],
     enableRowSelection,
     context: {
+      module,
       tenantSlug,
       enumConfig,
+      translate: tr,
+      hasTranslation,
     },
   });
   const table = useReactTable({
@@ -92,14 +103,17 @@ export function DataTable({
   const errorMessage =
     typeof rawErrorMessage === "string" && rawErrorMessage.trim().length > 0
       ? rawErrorMessage
-      : "Unable to load data.";
+      : t("shared.table.unableToLoadData");
 
   if (loading) return <Loader screen />;
   if (!data || error) {
-    const title = errorStatus === 403 ? "Access denied" : "Something went wrong";
+    const title =
+      errorStatus === 403
+        ? t("shared.table.accessDenied")
+        : t("shared.table.somethingWentWrong");
     const message =
       errorStatus === 403
-        ? "You do not have permission to view this data."
+        ? t("shared.table.permissionDenied")
         : errorMessage;
 
     return (
@@ -213,9 +227,11 @@ export function DataTable({
                     colSpan={prepared.columns.length}
                     className="h-36 text-center"
                   >
-                    <h2 className="text-lg font-semibold">No results</h2>
+                    <h2 className="text-lg font-semibold">
+                      {t("shared.table.noResults")}
+                    </h2>
                     <p className="text-sm text-muted-foreground">
-                      No data available for the current filter.
+                      {t("shared.table.noDataForFilter")}
                     </p>
                   </TableCell>
                 </TableRow>
@@ -246,13 +262,14 @@ function GlobalFilter({
   columns,
   translations,
 }) {
+  const { t } = useTranslation();
   const filterableColumns = columns.filter((column) => column?.filterable);
   return (
     <Input
       type="text"
       value={globalFilter || ""}
       onChange={(e) => onGlobalFilterChange(e.target.value)}
-      placeholder={translations?.SEARCH_PLACEHOLDER || "Search..."}
+      placeholder={translations?.SEARCH_PLACEHOLDER || t("shared.table.search")}
       className="w-72"
       prepend={
         <span className="text-muted-foreground">
@@ -264,9 +281,11 @@ function GlobalFilter({
           content={
             <div className="flex flex-col">
               <div className="flex flex-col">
-                <span className="text-sm font-medium">Filterable columns</span>
+                <span className="text-sm font-medium">
+                  {t("shared.table.filterableColumns")}
+                </span>
               </div>
-              <p>You can filter by the following columns:</p>
+              <p>{t("shared.table.filterByColumns")}</p>
               <div>
                 {filterableColumns.map((column) => (
                   <span

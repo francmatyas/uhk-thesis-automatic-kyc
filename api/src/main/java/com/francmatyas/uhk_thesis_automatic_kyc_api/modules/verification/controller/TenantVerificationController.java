@@ -5,7 +5,7 @@ import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.check_result.dto.Che
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.check_result.service.CheckResultService;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.risk_score.dto.RiskScoreResponse;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.risk_score.service.RiskScoreService;
-import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.verification.dto.VerificationResponse;
+import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.verification.model.Verification;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.verification.model.VerificationStatus;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.verification.service.VerificationService;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.security.RequireActiveTenant;
@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.Map;
@@ -49,11 +51,13 @@ public class TenantVerificationController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('PERM_tenant.verifications:read')")
-    public ResponseEntity<?> get(@AuthenticationPrincipal User currentUser, @PathVariable UUID id) {
+    public ResponseEntity<?> get(@AuthenticationPrincipal User currentUser, @PathVariable UUID id,
+                                 Authentication authentication) {
         if (currentUser == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         try {
-            return ResponseEntity.ok(VerificationResponse.from(
-                    verificationService.findByIdAndTenant(id, TenantContext.getTenantId())));
+            Verification v = verificationService.findByIdAndTenant(id, TenantContext.getTenantId());
+            boolean canReadIdentity = hasAuthority(authentication, "PERM_tenant.client-identities:read");
+            return ResponseEntity.ok(verificationService.toDetailResponse(v, canReadIdentity));
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         }
@@ -73,6 +77,32 @@ public class TenantVerificationController {
         }
     }
 
+    @PostMapping("/{id}/approve")
+    @PreAuthorize("hasAnyAuthority('PERM_tenant.verifications:review')")
+    public ResponseEntity<?> approve(@AuthenticationPrincipal User currentUser, @PathVariable UUID id) {
+        if (currentUser == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        try {
+            return ResponseEntity.ok(verificationService.approveReview(id, TenantContext.getTenantId(), currentUser.getId()));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/{id}/reject")
+    @PreAuthorize("hasAnyAuthority('PERM_tenant.verifications:review')")
+    public ResponseEntity<?> reject(@AuthenticationPrincipal User currentUser, @PathVariable UUID id) {
+        if (currentUser == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        try {
+            return ResponseEntity.ok(verificationService.rejectReview(id, TenantContext.getTenantId(), currentUser.getId()));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @GetMapping("/{id}/risk-score")
     @PreAuthorize("hasAnyAuthority('PERM_tenant.verifications:read')")
     public ResponseEntity<?> riskScore(@AuthenticationPrincipal User currentUser, @PathVariable UUID id) {
@@ -86,5 +116,10 @@ public class TenantVerificationController {
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         }
+    }
+
+    private static boolean hasAuthority(Authentication auth, String authority) {
+        return auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals(authority));
     }
 }

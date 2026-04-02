@@ -25,9 +25,18 @@ spring:
       max-request-size: 10MB
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
-    port: ${RABBITMQ_PORT:5672}
+    port: ${RABBITMQ_PORT:5671}
     username: ${RABBITMQ_USER:guest}
     password: ${RABBITMQ_PASS:guest}
+    ssl:
+      enabled: ${RABBITMQ_SSL_ENABLED:true}
+      verify-hostname: ${RABBITMQ_SSL_VERIFY_HOSTNAME:true}
+      trust-store: ${RABBITMQ_TRUSTSTORE_PATH:}
+      trust-store-password: ${RABBITMQ_TRUSTSTORE_PASSWORD:}
+      trust-store-type: ${RABBITMQ_TRUSTSTORE_TYPE:PKCS12}
+      key-store: ${RABBITMQ_KEYSTORE_PATH:}
+      key-store-password: ${RABBITMQ_KEYSTORE_PASSWORD:}
+      key-store-type: ${RABBITMQ_KEYSTORE_TYPE:PKCS12}
     listener:
       simple:
         acknowledge-mode: auto
@@ -39,10 +48,15 @@ storage:
     bucket: ${S3_BUCKET:}
     region: ${S3_REGION:us-east-1}
     endpoint: ${S3_ENDPOINT:}
+    worker-presign-endpoint: ${S3_WORKER_PRESIGN_ENDPOINT:${S3_ENDPOINT:}}
     public-base-url: ${S3_PUBLIC_BASE_URL:}
 
 api:
   instanceId: api-1
+
+kyc:
+  flow:
+    base-url: ${KYC_FLOW_BASE_URL:http://localhost:5174/v}
 
 app:
   env: ${APP_ENV:dev}
@@ -70,10 +84,7 @@ app:
       name: ${APP_BOOTSTRAP_TEST_TENANT_NAME:Test Tenant}
     test-verification:
       enabled: ${APP_BOOTSTRAP_TEST_VERIFICATION_ENABLED:false}
-      doc-type: ${APP_BOOTSTRAP_TEST_VERIFICATION_DOC_TYPE:passport}
-      front-image-path: ${APP_BOOTSTRAP_TEST_VERIFICATION_FRONT_IMAGE_PATH:}
-      back-image-path: ${APP_BOOTSTRAP_TEST_VERIFICATION_BACK_IMAGE_PATH:}
-      liveness-image-paths: ${APP_BOOTSTRAP_TEST_VERIFICATION_LIVENESS_IMAGE_PATHS:}
+      image-key-prefix: ${APP_BOOTSTRAP_TEST_VERIFICATION_IMAGE_KEY_PREFIX:bootstrap/test}
       first-name: ${APP_BOOTSTRAP_TEST_VERIFICATION_FIRST_NAME:Test}
       last-name: ${APP_BOOTSTRAP_TEST_VERIFICATION_LAST_NAME:User}
       date-of-birth: ${APP_BOOTSTRAP_TEST_VERIFICATION_DATE_OF_BIRTH:1990-01-15}
@@ -94,4 +105,3 @@ app:
 logging:
   level:
     org.springframework: INFO
-

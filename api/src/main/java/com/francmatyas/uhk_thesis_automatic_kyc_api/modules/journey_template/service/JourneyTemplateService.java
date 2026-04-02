@@ -7,6 +7,8 @@ import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.journey_template.dto
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.journey_template.model.JourneyTemplate;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.journey_template.model.JourneyTemplateStatus;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.journey_template.repository.JourneyTemplateRepository;
+import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.tenant.model.Tenant;
+import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.tenant.repository.TenantRepository;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.util.DisplayFieldScanner;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ import java.util.UUID;
 public class JourneyTemplateService {
 
     private final JourneyTemplateRepository repository;
+    private final TenantRepository tenantRepository;
 
     public TableDTO getProviderJourneyTemplatesTable(int page, int size, String sortBy, String sortDir, UUID tenantId) {
         int safePage = Math.max(0, page);
@@ -92,11 +95,15 @@ public class JourneyTemplateService {
 
 
     private JourneyTemplateListDTO toProviderListDto(JourneyTemplate t) {
+        String tenantName = t.getTenantId() != null
+                ? tenantRepository.findById(t.getTenantId()).map(Tenant::getName).orElse(null)
+                : null;
         return JourneyTemplateListDTO.builder()
                 .id(t.getId().toString())
                 .name(t.getName())
                 .status(t.getStatus() != null ? t.getStatus().name() : null)
                 .tenantId(t.getTenantId() != null ? t.getTenantId().toString() : null)
+                .tenantName(tenantName)
                 .createdAt(t.getCreatedAt())
                 .build();
     }

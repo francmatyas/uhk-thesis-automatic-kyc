@@ -9,6 +9,8 @@ import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.audit.model.AuditAct
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.audit.model.AuditLog;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.audit.model.AuditResult;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.audit.repository.AuditLogRepository;
+import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.auth.model.User;
+import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.auth.repository.UserRepository;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.util.DisplayFieldScanner;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,6 +33,7 @@ import java.util.UUID;
 public class AuditLogService {
     private final AuditLogRepository repo;
     private final ObjectMapper objectMapper;
+    private final UserRepository userRepository;
 
     @Transactional
     public AuditLog log(AuditLogCommand command) {
@@ -166,7 +169,13 @@ public class AuditLogService {
     }
 
     private AuditLogListDTO toListDTO(AuditLog a) {
-        String action = a.getAction();
+        String actorUserId = null;
+        String actorUserName = null;
+        if (a.getActorType() == AuditActorType.USER && a.getActorUserId() != null) {
+            actorUserId = a.getActorUserId().toString();
+            actorUserName = userRepository.findById(a.getActorUserId())
+                    .map(User::getFullName).orElse(actorUserId);
+        }
         return AuditLogListDTO.builder()
                 .id(a.getId().toString())
                 .action(a.getAction())
@@ -174,10 +183,19 @@ public class AuditLogService {
                 .actorType(a.getActorType().name())
                 .entityType(a.getEntityType())
                 .result(a.getResult().name())
+                .actorUserId(actorUserId)
+                .actorUserName(actorUserName)
                 .build();
     }
 
     private AuditLogProviderListDTO toProviderListDTO(AuditLog a) {
+        String actorUserId = null;
+        String actorUserName = null;
+        if (a.getActorType() == AuditActorType.USER && a.getActorUserId() != null) {
+            actorUserId = a.getActorUserId().toString();
+            actorUserName = userRepository.findById(a.getActorUserId())
+                    .map(User::getFullName).orElse(actorUserId);
+        }
         return AuditLogProviderListDTO.builder()
                 .id(a.getId().toString())
                 .action(a.getAction())
@@ -185,6 +203,8 @@ public class AuditLogService {
                 .actorType(a.getActorType().name())
                 .entityType(a.getEntityType())
                 .result(a.getResult().name())
+                .actorUserId(actorUserId)
+                .actorUserName(actorUserName)
                 .build();
     }
 

@@ -15,9 +15,9 @@ public class PermissionListDTO {
     @DisplayField(header = "Id", order = 1, hidden = true, sortable = false, filterable = false)
     private String id;
 
-    @DisplayField(header = "Permission", order = 2, type = DisplayFieldType.REFERENCE, referenceKey = "id", referenceTemplate = "/p/permissions/{id}")
+    @DisplayField(header = "moduleDefinitions.permissions.columns.label", order = 2, type = DisplayFieldType.REFERENCE, referenceKey = "id", referenceTemplate = "/p/permissions/{id}")
     private String label;
 
-    @DisplayField(header = "Description", order = 3)
+    @DisplayField(header = "moduleDefinitions.permissions.columns.description", order = 3)
     private String description;
 }

@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -27,6 +28,9 @@ export function useCrudDetail({
   onEntityLoaded,
   transformEntityForForm,
 }) {
+  const { t } = useTranslation();
+  const tr = (value) =>
+    typeof value === "string" ? t(value, { defaultValue: value }) : value;
   const inEditMode = mode === "edit";
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -58,14 +62,14 @@ export function useCrudDetail({
       const message = inEditMode
         ? successMessages.update
         : successMessages.create;
-      toast.success(message);
+      toast.success(tr(message));
 
       if (!inEditMode && result?.id && getCreateRedirectPath) {
         navigate(getCreateRedirectPath(result));
       }
     },
     onError: () => {
-      toast.error(errorMessages.save);
+      toast.error(tr(errorMessages.save));
     },
   });
 
@@ -73,13 +77,13 @@ export function useCrudDetail({
     mutationFn: () => deleteOne(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.list() });
-      toast.success(successMessages.remove);
+      toast.success(tr(successMessages.remove));
       if (getDeleteRedirectPath) {
         navigate(getDeleteRedirectPath());
       }
     },
     onError: () => {
-      toast.error(errorMessages.remove);
+      toast.error(tr(errorMessages.remove));
     },
   });
 
@@ -88,7 +92,7 @@ export function useCrudDetail({
   };
 
   const remove = () => {
-    if (!confirm(confirmDeleteMessage)) return;
+    if (!confirm(tr(confirmDeleteMessage))) return;
     deleteMutation.mutate();
   };
 

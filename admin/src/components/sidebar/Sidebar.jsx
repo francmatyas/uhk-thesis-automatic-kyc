@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 import SidebarHeader from "@/components/sidebar/SidebarHeader";
 import Nav from "@/components/sidebar/Nav";
 import NavUser from "@/components/sidebar/NavUser";
@@ -13,7 +14,7 @@ import {
 } from "@/components/ui/sidebar";
 import SidebarTenantSwitch from "./SidebarTenantSwitch";
 import _menuConfig from "./_menuConfig";
-function buildMenuSections(config, hasPermission) {
+function buildMenuSections(config, hasPermission, t) {
   const sections = Object.values(config);
 
   return sections
@@ -25,7 +26,7 @@ function buildMenuSections(config, hasPermission) {
         })
         .filter((item) => Boolean(item.path))
         .map((item) => ({
-          title: item.label,
+          title: item.labelKey ? t(item.labelKey) : item.label,
           url: item.path,
           icon: item.icon,
           action: item.action,
@@ -34,7 +35,7 @@ function buildMenuSections(config, hasPermission) {
       if (items.length === 0) return null;
       
       return {
-        label: section.label,
+        label: section.labelKey ? t(section.labelKey) : section.label,
         admin: section.admin || false,
         items,
       };
@@ -43,14 +44,16 @@ function buildMenuSections(config, hasPermission) {
 }
 
 export default function Sidebar({ ...props }) {
+  const { t } = useTranslation();
   const { hasPermission, activeScope, routeTenantSlug } = useAuth();
   const sections = React.useMemo(
     () =>
       buildMenuSections(
         _menuConfig({ scope: activeScope, tenantSlug: routeTenantSlug }),
         hasPermission,
+        t,
       ),
-    [hasPermission, activeScope, routeTenantSlug],
+    [hasPermission, activeScope, routeTenantSlug, t],
   );
   const clientSections = sections.filter((section) => !section.admin);
   const adminSections = sections.filter((section) => section.admin);

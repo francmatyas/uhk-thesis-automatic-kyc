@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   Plus,
@@ -43,6 +44,7 @@ import {
 import { Link } from "@/components/ui/link";
 
 export default function GroupsSidebar({ moduleKey }) {
+  const { t } = useTranslation();
   let fetchGroups;
   let createGroup;
   let editGroup;
@@ -290,7 +292,10 @@ export default function GroupsSidebar({ moduleKey }) {
                         <ChevronRight className="h-4 w-4" />
                       </motion.div>
                       <span className="sr-only">
-                        {isCollapsed ? "Expand" : "Collapse"} Groups
+                        {isCollapsed
+                          ? t("sidebar.groups.expand")
+                          : t("sidebar.groups.collapse")}{" "}
+                        {t("sidebar.groups.title")}
                       </span>
                     </Button>
                   </motion.div>
@@ -331,12 +336,12 @@ export default function GroupsSidebar({ moduleKey }) {
                           exit={{ opacity: 0 }}
                           transition={{ duration: 0.2 }}
                         >
-                          Failed to load groups.{" "}
+                          {t("sidebar.groups.loadFailed")}{" "}
                           <button
                             className="underline hover:no-underline"
                             onClick={() => refetch()}
                           >
-                            Retry
+                            {t("sidebar.groups.retry")}
                           </button>
                         </motion.div>
                       )}
@@ -361,7 +366,11 @@ export default function GroupsSidebar({ moduleKey }) {
                             ? "p-2 justify-center"
                             : "px-2 py-2 justify-between"
                         }`}
-                        tooltip={isCollapsed ? `All ${displayName}` : undefined}
+                        tooltip={
+                          isCollapsed
+                            ? t("sidebar.groups.allItems", { module: displayName })
+                            : undefined
+                        }
                         tooltipProps={{ side: "right" }}
                       >
                         <span
@@ -373,7 +382,7 @@ export default function GroupsSidebar({ moduleKey }) {
                           <Folders className="h-4 w-4 flex-shrink-0" />
                           {!isCollapsed && (
                             <span className="text-nowrap">
-                              All {displayName}
+                              {t("sidebar.groups.allItems", { module: displayName })}
                             </span>
                           )}
                         </span>
@@ -548,7 +557,9 @@ export default function GroupsSidebar({ moduleKey }) {
                                   }}
                                 >
                                   {g.pinned ? <PinOff /> : <Pin />}
-                                  {g.pinned ? "Unpin" : "Pin"}
+                                  {g.pinned
+                                    ? t("sidebar.groups.context.unpin")
+                                    : t("sidebar.groups.context.pin")}
                                 </ContextMenuItem>
                                 <ContextMenuItem
                                   className={"cursor-pointer"}
@@ -566,7 +577,7 @@ export default function GroupsSidebar({ moduleKey }) {
                                   }}
                                 >
                                   <Pencil />
-                                  Edit
+                                  {t("sidebar.groups.context.edit")}
                                 </ContextMenuItem>
                                 <ContextMenuItem
                                   className={"cursor-pointer"}
@@ -575,7 +586,7 @@ export default function GroupsSidebar({ moduleKey }) {
                                   }}
                                 >
                                   <Trash />
-                                  Delete
+                                  {t("sidebar.groups.context.delete")}
                                 </ContextMenuItem>
                               </ContextMenuContent>
                             </ContextMenu>
@@ -599,7 +610,7 @@ export default function GroupsSidebar({ moduleKey }) {
                               exit={{ opacity: 0 }}
                               transition={{ duration: 0.2 }}
                             >
-                              No groups found.
+                              {t("sidebar.groups.empty")}
                             </motion.div>
                           </AnimatePresence>
                         </motion.div>
@@ -620,12 +631,16 @@ export default function GroupsSidebar({ moduleKey }) {
                               "px-1 py-3 justify-start": !isCollapsed,
                             }
                           )}
-                          tooltip={isCollapsed ? "Create New Group" : undefined}
+                          tooltip={
+                            isCollapsed
+                              ? t("sidebar.groups.createNew")
+                              : undefined
+                          }
                           tooltipProps={{ side: "right" }}
                         >
                           <Plus className="h-4 w-4" />
                           <span className={cn(isCollapsed && "sr-only")}>
-                            New Group
+                            {t("sidebar.groups.newGroup")}
                           </span>
                         </Button>
                       </DialogTrigger>
@@ -636,13 +651,18 @@ export default function GroupsSidebar({ moduleKey }) {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>
-                    {editingGroupId ? "Edit Group" : "New Group"}
+                    {editingGroupId
+                      ? t("sidebar.groups.dialog.editTitle")
+                      : t("sidebar.groups.dialog.newTitle")}
                   </DialogTitle>
                   <DialogDescription className="text-sm text-muted-foreground">
                     {editingGroupId
-                      ? "Edit the group to organize your "
-                      : "Create a new group to organize your "}
-                    {displayName.toLowerCase()}.
+                      ? t("sidebar.groups.dialog.editDescription", {
+                          module: displayName.toLowerCase(),
+                        })
+                      : t("sidebar.groups.dialog.createDescription", {
+                          module: displayName.toLowerCase(),
+                        })}
                   </DialogDescription>
                 </DialogHeader>
 
@@ -650,7 +670,7 @@ export default function GroupsSidebar({ moduleKey }) {
                   <Input
                     autoFocus
                     type="text"
-                    placeholder="Group Name"
+                    placeholder={t("sidebar.groups.dialog.groupNamePlaceholder")}
                     value={newGroupName}
                     onChange={(e) => setNewGroupName(e.target.value)}
                     onKeyDown={(e) => {
@@ -676,7 +696,9 @@ export default function GroupsSidebar({ moduleKey }) {
                     onClick={handleDialogSubmit}
                     className={"cursor-pointer mt-2"}
                   >
-                    {editingGroupId ? "Save Changes" : "Create"}
+                    {editingGroupId
+                      ? t("sidebar.groups.dialog.saveChanges")
+                      : t("sidebar.groups.dialog.create")}
                   </Button>
                 </div>
               </DialogContent>

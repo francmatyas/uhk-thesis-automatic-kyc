@@ -89,6 +89,7 @@ public class TenantJourneyTemplateController {
             JourneyTemplate patch = new JourneyTemplate();
             patch.setName(req.getName());
             patch.setDescription(req.getDescription());
+            patch.setStatus(req.getStatus());
             patch.setConfigJson(req.getConfigJson());
             JourneyTemplateResponse updated = JourneyTemplateResponse.from(service.update(id, tenantId, patch));
             audit(currentUser, httpReq, tenantId, id, "JOURNEY_TEMPLATE_UPDATE", null, updated);

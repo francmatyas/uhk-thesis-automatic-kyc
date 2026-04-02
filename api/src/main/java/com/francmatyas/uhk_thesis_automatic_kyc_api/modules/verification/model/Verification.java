@@ -9,6 +9,7 @@ import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -45,7 +46,7 @@ public class Verification extends BaseEntity implements TenantScopedEntity {
     private JourneyTemplate journeyTemplate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_identity_id", nullable = false,
+    @JoinColumn(name = "client_identity_id",
             foreignKey = @ForeignKey(name = "fk_verifications_client_identity"))
     private ClientIdentity clientIdentity;
 
@@ -70,4 +71,8 @@ public class Verification extends BaseEntity implements TenantScopedEntity {
     /** Uživatel (tenant operátor nebo provider), který tuto verifikaci inicioval. */
     @Column(name = "created_by_user_id")
     private UUID createdByUserId;
+
+    /** Celkové skóre KYC verifikace v rozsahu [0, 1]; vypočítáno po dokončení automatických kontrol. */
+    @Column(name = "overall_score", precision = 6, scale = 4)
+    private BigDecimal overallScore;
 }

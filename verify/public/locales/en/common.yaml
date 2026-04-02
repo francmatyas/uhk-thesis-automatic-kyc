@@ -1,0 +1,293 @@
+app:
+  name: KYC Verify
+
+home:
+  title: Identity Verification
+  description: Open your unique verification link or enter token to continue the secure KYC process.
+  tokenLabel: Verification token
+  tokenPlaceholder: Enter your verification token
+  startFlow: Start verification
+
+flow:
+  title: Verification flow
+  progress: Progress
+  stepsTitle: Verification steps
+  currentStepTitle: Current step
+  completeStep: Complete
+  completedTitle: Verification completed
+  completedDescription: All required steps are completed. Your verification will continue with automated checks.
+  securityInfo: Your data is encrypted and processed according to your tenant compliance settings.
+  expiresAt: Expires at
+  loading: Loading verification flow...
+  loadError: Something went wrong
+  loadErrorDescription: The verification could not be loaded. Check the link and try again.
+  retry: Retry
+  alreadySubmitted: Verification already submitted
+  alreadySubmittedDescription: This verification has already been completed and submitted for review. No further action is required.
+  expired: Verification link expired
+  expiredDescription: This verification link is no longer valid. Please request a new verification link.
+  sending: Sending...
+  verifying: Verifying...
+  uploading: Uploading...
+  fallbackDescription: Complete this step to continue the verification process.
+  continueOnPhone: Continue on phone
+  qrDescription: Scan this QR code with your phone to continue the verification on a mobile device.
+  share: Share link
+  copyLink: Copy link
+  linkCopied: Copied!
+
+status:
+  INITIATED: Initiated
+  IN_PROGRESS: In progress
+  READY_FOR_AUTOCHECK: Ready for auto-check
+  AUTO_PASSED: Auto passed
+  AUTO_FAILED: Auto failed
+  REQUIRES_REVIEW: Requires review
+  APPROVED: Approved
+  REJECTED: Rejected
+  EXPIRED: Expired
+
+stepStatus:
+  PENDING: Pending
+  IN_PROGRESS: In progress
+  COMPLETED: Completed
+  FAILED: Failed
+  SKIPPED: Skipped
+
+stepType:
+  EMAIL_VERIFICATION: Email verification
+  PHONE_VERIFICATION: Phone verification
+  DOCUMENT_IDENTITY: ID or passport
+  LIVENESS_CHECK: Liveness check
+  CUSTOM: Additional verification
+  AML_QUESTIONNAIRE: Financial questionnaire
+  PERSONAL_INFO: Personal information
+
+step:
+  email:
+    shortDescription: We will send a one-time code to your email.
+    emailLabel: Email address
+    emailPlaceholder: your@email.com
+    sendCode: Send code to email
+    codeLabel: Verification code
+    codePlaceholder: Enter code from email
+    verifyCode: Verify email code
+    codeSentTo: "Code sent to"
+    resendCode: Resend code
+    sendError: Email code could not be sent.
+    verifyError: Email code verification failed.
+    invalidCode: Invalid email code. Please try again.
+  phone:
+    shortDescription: We will send a one-time SMS code to your phone.
+    phoneLabel: Phone number
+    phonePlaceholder: 612 345 678
+    sendCode: Send SMS code
+    codeLabel: SMS code
+    codePlaceholder: Enter SMS code
+    verifyCode: Verify phone code
+    codeSentTo: "SMS sent to"
+    resendCode: Resend SMS
+    sendError: SMS code could not be sent.
+    verifyError: Phone code verification failed.
+    invalidCode: Invalid SMS code. Please try again.
+  document:
+    shortDescription: Select document type and scan with camera or upload from your device.
+    selectTitle: Select your document type
+    selectDescription: Choose document type to start identity scan.
+    captureTitle: Capture {{side}}
+    captureDescription: Upload document image for each required side.
+    continue: Continue
+    backToType: Change type
+    nextSide: Next side
+    cameraUnavailable: Camera is not available. Use upload instead.
+    typeLabel: Document type
+    idCard: ID card
+    idCardHint: 2 sides required (front + back)
+    passport: Passport
+    passportHint: Front side only
+    notSelected: Not selected
+    side:
+      front: Front side
+      back: Back side
+    sideProgress: "Side {{current}} of {{total}}"
+    scan: Scan
+    pickUpload: Upload
+    tapToUpload: Tap to upload from gallery
+    changePhoto: Change photo
+    useCamera: Use camera
+    capturePhoto: Capture photo
+    cameraDescription: Position the document in the frame and take a photo.
+    backToUpload: Upload instead
+    continueToBack: Continue to back side
+    backToFront: Back to front side
+    fileLabel: Take photo or upload document image
+    fileHint: Select an image file from your device.
+    upload: Submit document
+    uploadError: Document upload failed.
+  liveness:
+    introDescription: "Position your face in the camera and follow the instructions. You will capture 4 photos — looking straight, left, right, and up."
+    captureTitle: Face position check
+    holdStill: Hold still, then tap Capture
+    startCheck: Start check
+    capture: Capture
+    captureManual: Take photo manually
+    reviewTitle: Review your photos
+    reviewDescription: Make sure each photo is clear and well-lit. Tap the refresh icon to retake any shot.
+    submit: Submit photos
+    retakeAll: Retake all
+    cameraError: Camera access was denied. Please allow camera permissions and try again.
+    uploadError: Liveness check upload failed.
+    detectionStatus:
+      loading: Loading face detection…
+      error: Auto-detection unavailable — use the button below
+      no-face: Position your face inside the circle
+      wrong-pose: Keep turning in that direction
+      correct-pose: Hold still…
+      captured: "Got it!"
+    direction:
+      front: Look straight at the camera
+      left: Turn your head to the left
+      right: Turn your head to the right
+      up: Tilt your head slightly up
+    positionLabel:
+      front: Front
+      left: Left
+      right: Right
+      up: Up
+  personalInfo:
+    shortDescription: Enter your full name and date of birth.
+    firstNameLabel: First name
+    firstNamePlaceholder: John
+    lastNameLabel: Last name
+    lastNamePlaceholder: Doe
+    dobLabel: Date of birth
+    submit: Continue
+    submitError: Personal information could not be submitted.
+  aml:
+    title: Financial Background
+    description: Help us understand your financial situation and how you plan to use your account.
+    submit: Submit questionnaire
+    uploadError: Questionnaire submission failed. Please try again.
+    section:
+      employment: Employment & Income
+      funds: Source of Funds
+      account: Account Usage
+      tax: Tax & Residency
+      compliance: Compliance Declaration
+    field:
+      employment_status:
+        label: Employment status
+        placeholder: Select status
+      employer_name:
+        label: Employer name
+        placeholder: Your employer or company name
+      job_title:
+        label: Job title
+        placeholder: Your current position
+      source_of_income:
+        label: Primary source of income
+        placeholder: Select source
+      monthly_income_range:
+        label: Monthly income (CZK)
+        placeholder: Select range
+      industry:
+        label: Industry
+        placeholder: Select industry
+      source_of_funds:
+        label: Source of funds for this account
+        placeholder: Select source
+      source_of_wealth:
+        label: Source of wealth
+        placeholder: Briefly describe how you accumulated your wealth...
+      purpose_of_account:
+        label: Purpose of account
+        placeholder: Select purpose
+      expected_monthly_volume:
+        label: Expected monthly transaction volume (CZK)
+        placeholder: Select volume
+      expected_transaction_count:
+        label: Expected number of monthly transactions
+        placeholder: Select range
+      foreign_transactions_expected:
+        label: Do you expect foreign payments or transfers?
+      is_czech_tax_resident:
+        label: Are you a tax resident of the Czech Republic?
+      tax_residency_country:
+        label: Country of tax residency
+        placeholder: Select country
+      tin:
+        label: Tax Identification Number (TIN)
+        placeholder: Enter your TIN
+      pep_self:
+        label: Are you a Politically Exposed Person (PEP)?
+        hint: "A person holding or recently held a prominent public function (politician, judge, senior state official, etc.)"
+      close_pep:
+        label: Are you a close associate or family member of a PEP?
+        hint: "Spouse, child, parent, or business partner of a PEP"
+      pep_explanation:
+        label: PEP relationship details
+        placeholder: Please describe your role or relationship with the PEP...
+      acting_on_own_behalf:
+        label: Are you acting on your own behalf?
+        hint: "Select No if you are acting as an authorised representative or on behalf of another person"
+      crypto:
+        label: Do you engage in cryptocurrency transactions?
+    options:
+      employment_status:
+        employed: "Employed (full or part-time)"
+        self_employed: Self-employed / freelancer
+        unemployed: Unemployed
+        retired: Retired
+        student: Student
+        other: Other
+      source_of_income:
+        employment: Employment / salary
+        self_employment: Self-employment
+        pension: Pension / retirement
+        student_support: Scholarship / student support
+        social_benefits: Social benefits
+        investments: Investments / dividends
+        rental_income: Rental income
+        other: Other
+      monthly_income_range:
+        under_20000: "Under CZK 20,000"
+        range_20000_50000: "CZK 20,000 – 50,000"
+        range_50000_100000: "CZK 50,000 – 100,000"
+        range_100000_250000: "CZK 100,000 – 250,000"
+        over_250000: "Over CZK 250,000"
+      source_of_funds:
+        salary: Salary / wages
+        business_income: Business income
+        savings: Personal savings
+        inheritance: Inheritance
+        gift: Gift
+        sale_of_assets: Sale of assets or property
+        investment_proceeds: Investment proceeds
+        other: Other
+      expected_monthly_volume:
+        under_5000: "Under CZK 5,000"
+        range_5000_25000: "CZK 5,000 – 25,000"
+        range_25000_100000: "CZK 25,000 – 100,000"
+        range_100000_500000: "CZK 100,000 – 500,000"
+        over_500000: "Over CZK 500,000"
+      expected_transaction_count:
+        below_5: "Fewer than 5"
+        range_5_20: "5 – 20"
+        range_20_50: "20 – 50"
+        above_50: "More than 50"
+      industry:
+        finance: Finance & banking
+        healthcare: Healthcare
+        technology: Technology & IT
+        retail: Retail & commerce
+        construction: Construction & real estate
+        education: Education
+        government: Government & public sector
+        media: Media & entertainment
+        manufacturing: Manufacturing
+        other: Other
+    yes: "Yes"
+    no: "No"
+    optional: optional
+    error:
+      required: This field is required

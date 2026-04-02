@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router";
 import { PlusCircle } from "lucide-react";
 import Table from "@/components/table/Table";
@@ -16,12 +17,16 @@ export default function ResourceTablePage({
   createPermission,
   buttons = [],
 }) {
+  const { t } = useTranslation();
   const { tenantSlug } = useParams();
   const { hasPermission } = useAuth();
   const resolvedCreatePath =
     typeof createPath === "function" ? createPath(tenantSlug) : createPath;
 
   const canCreate = !createPermission || hasPermission(createPermission);
+
+  const tr = (value) =>
+    typeof value === "string" ? t(value, { defaultValue: value }) : value;
 
   const headerButtons = useMemo(() => {
     const normalizedButtons = Array.isArray(buttons) ? buttons : [];
@@ -34,12 +39,12 @@ export default function ResourceTablePage({
       <Link to={resolvedCreatePath} key={`${module}-create`}>
         <Button size="default">
           <PlusCircle />
-          {createLabel}
+          {tr(createLabel)}
         </Button>
       </Link>,
       ...normalizedButtons,
     ];
-  }, [buttons, showCreateButton, resolvedCreatePath, canCreate, module, createLabel]);
+  }, [buttons, showCreateButton, resolvedCreatePath, canCreate, module, createLabel, t]);
 
   return (
     <div className="flex flex-col gap-2 p-2">
@@ -50,7 +55,7 @@ export default function ResourceTablePage({
           enumConfig={enumConfig}
           buttons={headerButtons}
           translations={{
-            SEARCH_PLACEHOLDER: searchPlaceholder || "Search",
+            SEARCH_PLACEHOLDER: tr(searchPlaceholder || "shared.table.search"),
           }}
         />
       </div>

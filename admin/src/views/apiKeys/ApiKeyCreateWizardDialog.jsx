@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router";
+import { useTranslation } from "react-i18next";
 import { PlusCircle } from "lucide-react";
 import { toast } from "sonner";
 import { createApiKey } from "@/api/tenant/apiKeys";
@@ -27,6 +28,7 @@ function mapCreatedCredentials(result) {
 }
 
 export default function ApiKeyCreateWizardDialog() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [created, setCreated] = useState(null);
@@ -46,10 +48,10 @@ export default function ApiKeyCreateWizardDialog() {
     onSuccess: async (result) => {
       setCreated(mapCreatedCredentials(result));
       await queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys.list() });
-      toast.success("API key created successfully.");
+      toast.success(t("moduleDefinitions.apiKeys.messages.success.create"));
     },
     onError: () => {
-      toast.error("Failed to create API key. Please try again.");
+      toast.error(t("moduleDefinitions.apiKeys.createWizard.toasts.errorCreate"));
     },
   });
 
@@ -63,7 +65,7 @@ export default function ApiKeyCreateWizardDialog() {
   const handleCreate = () => {
     const trimmedName = name.trim();
     if (!trimmedName) {
-      toast.error("API key name is required.");
+      toast.error(t("moduleDefinitions.apiKeys.createWizard.validation.nameRequired"));
       return;
     }
 
@@ -82,7 +84,7 @@ export default function ApiKeyCreateWizardDialog() {
     <>
       <Button size="default" onClick={() => setOpen(true)}>
         <PlusCircle />
-        New API Key
+        {t("moduleDefinitions.apiKeys.createWizard.trigger")}
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -90,19 +92,23 @@ export default function ApiKeyCreateWizardDialog() {
           {!created && (
             <>
               <DialogHeader>
-                <DialogTitle>Create API Key</DialogTitle>
+                <DialogTitle>
+                  {t("moduleDefinitions.apiKeys.createWizard.dialog.title")}
+                </DialogTitle>
                 <DialogDescription>
-                  Enter a name. You will see the secret exactly once after creation.
+                  {t("moduleDefinitions.apiKeys.createWizard.dialog.description")}
                 </DialogDescription>
               </DialogHeader>
 
               <div className="py-2">
                 <Input
-                  label="Name"
+                  label={t("moduleDefinitions.apiKeys.createWizard.fields.name")}
                   required
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  placeholder="Trading bot key"
+                  placeholder={t(
+                    "moduleDefinitions.apiKeys.createWizard.fields.namePlaceholder",
+                  )}
                   disabled={createMutation.isPending}
                 />
               </div>
@@ -113,10 +119,10 @@ export default function ApiKeyCreateWizardDialog() {
                   onClick={() => handleOpenChange(false)}
                   disabled={createMutation.isPending}
                 >
-                  Cancel
+                  {t("moduleDefinitions.apiKeys.createWizard.actions.cancel")}
                 </Button>
                 <Button onClick={handleCreate} loading={createMutation.isPending}>
-                  Create
+                  {t("moduleDefinitions.apiKeys.createWizard.actions.create")}
                 </Button>
               </DialogFooter>
             </>
@@ -125,34 +131,35 @@ export default function ApiKeyCreateWizardDialog() {
           {created && (
             <>
               <DialogHeader>
-                <DialogTitle>Store Your API Secret Now</DialogTitle>
+                <DialogTitle>
+                  {t("moduleDefinitions.apiKeys.createWizard.created.title")}
+                </DialogTitle>
                 <DialogDescription>
-                  This secret is shown only once and will not be visible again.
+                  {t("moduleDefinitions.apiKeys.createWizard.created.description")}
                 </DialogDescription>
               </DialogHeader>
 
               <div className="flex flex-col gap-3 py-1">
-                <div className="rounded-md border p-3">
-                  <div className="text-xs text-muted-foreground">Public Key</div>
-                  <code className="block break-all pt-1 text-sm">
-                    {created.publicKey || "Not returned by API"}
-                  </code>
-                </div>
-
-                <div className="rounded-md border p-3">
-                  <div className="text-xs text-muted-foreground">Secret</div>
-                  <code className="block break-all pt-1 text-sm">
-                    {created.secret || "Not returned by API"}
-                  </code>
-                </div>
+                <Input
+                  label={t("moduleDefinitions.apiKeys.createWizard.created.publicKey")}
+                  readOnly
+                  clickToCopy
+                  value={created.publicKey || t("moduleDefinitions.apiKeys.createWizard.created.notReturned")}
+                />
+                <Input
+                  label={t("moduleDefinitions.apiKeys.createWizard.created.secret")}
+                  readOnly
+                  clickToCopy
+                  value={created.secret || t("moduleDefinitions.apiKeys.createWizard.created.notReturned")}
+                />
               </div>
 
               <DialogFooter>
                 <Button variant="ghost" onClick={() => handleOpenChange(false)}>
-                  Close
+                  {t("moduleDefinitions.apiKeys.createWizard.actions.close")}
                 </Button>
                 <Button onClick={handleOpenDetail} disabled={!created.id}>
-                  Open Detail
+                  {t("moduleDefinitions.apiKeys.createWizard.actions.openDetail")}
                 </Button>
               </DialogFooter>
             </>

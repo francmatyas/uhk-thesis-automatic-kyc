@@ -19,10 +19,10 @@ import java.util.Map;
 /**
  * Odesílá úlohy KYC verifikace do Python workeru přes RabbitMQ.
  *
- * <p>Worker naslouchá frontě {@code q.worker.kyc_worker}, která je navázaná na
+ * Worker naslouchá frontě {@code q.worker.kyc_worker}, která je navázaná na
  * exchange {@code x.jobs} s routing key {@code jobs.kyc_worker.#}.
  * Jednotlivé typy úloh (např. {@code verify_czech_id}) jsou vložené do těla zprávy,
- * takže worker může interně směrovat zpracování.</p>
+ * takže worker může interně směrovat zpracování.
  */
 @Slf4j
 @Service
@@ -54,8 +54,14 @@ public class KycJobDispatcher {
                                            String frontImagePath, String backImagePath) {
         ObjectNode payload = mapper.createObjectNode();
         payload.put("verificationId", verification.getId().toString());
-        if (frontImagePath != null) payload.put("frontImagePath", frontImagePath);
-        if (backImagePath != null) payload.put("backImagePath", backImagePath);
+        if (jobType.equalsIgnoreCase("verify_passport")) {
+            payload.put("imagePath", frontImagePath);
+        } else if (jobType.equalsIgnoreCase("verify_czech_id")) {
+            if (frontImagePath != null) payload.put("frontImagePath", frontImagePath);
+            if (backImagePath != null) payload.put("backImagePath", backImagePath);
+        } else {
+            throw new IllegalArgumentException("Unsupported document check job type: " + jobType);
+        }
         return dispatchJob(verification, jobType, payload);
     }
 

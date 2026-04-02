@@ -226,6 +226,10 @@ def _extract_fields(raw_ocr: str) -> CzechIDFaceFields:
     protože spolehlivě zachytí všechny tři řádky adresy (město / ulice / okres).
     Vzory podle popisků v _FIELD_PATTERNS slouží jako fallback.
     """
+    # Normalize known OCR character confusions before any extraction
+    for _pat, _repl in _OCR_CHAR_CORRECTIONS:
+        raw_ocr = _pat.sub(_repl, raw_ocr)
+
     extracted: dict[str, str] = {}
 
     # Adresa: preferovat přístup přes kotvu č.p. (zachytí 3 řádky)
@@ -241,6 +245,12 @@ def _extract_fields(raw_ocr: str) -> CzechIDFaceFields:
             value = _clean_field_value(match.group(1))
             if value:
                 extracted[field_key] = value
+
+    # Poslední záloha pro adresu: sémantická extrakce přes popisek bez závislosti na \n
+    if "address" not in extracted:
+        addr = _extract_address_by_label(raw_ocr)
+        if addr:
+            extracted["address"] = addr
 
     # Normalizace rodného čísla: odstranit mezery kolem lomítka
     rc = extracted.get("national_number")
@@ -262,6 +272,26 @@ def _extract_fields(raw_ocr: str) -> CzechIDFaceFields:
     )
 
 
+# Známé záměny znaků při OCR českých občanských průkazů.
+# Aplikují se na surový OCR text před jakoukoli extrakcí polí, aby z toho
+# těžily všechny parsery.
+#
+# Lze bezpečně aplikovat globálně — tyto symboly se v tištěném textu na OP
+# nikdy legitimně nevyskytují (jde o měnové/interpunkční znaky, které
+# Tesseract zaměňuje za vizuálně podobné české diakritické znaky).
+_OCR_CHAR_CORRECTIONS: list[tuple[re.Pattern, str]] = [
+    # Záměny symbol → české písmeno
+    (re.compile(r"€"),  "Č"),   # € → Č  (znak eura, velmi časté)
+    (re.compile(r"£"),  "Č"),   # £ → Č  (znak libry, stejný zakřivený tvar)
+    (re.compile(r"§"),  "Š"),   # § → Š  (znak paragrafu, podobná horní smyčka)
+    (re.compile(r"¢"),  "č"),   # ¢ → č  (znak centu, malá varianta záměny eura)
+    # č.p. (číslo popisné) — č bývá rozpoznáno jako přízvučná samohláska
+    (re.compile(r"\b[éó]\.p\.", re.IGNORECASE | re.UNICODE), "č.p."),
+]
+
+_CP_PATTERN = re.compile(r"č\.?\s*p\.", re.IGNORECASE | re.UNICODE)
+
+
 def _extract_address_by_cp_anchor(raw_ocr: str) -> Optional[str]:
     """
     Najde blok adresy pomocí značky domovního čísla 'č.p.', která je
@@ -272,7 +302,7 @@ def _extract_address_by_cp_anchor(raw_ocr: str) -> Optional[str]:
     """
     lines = raw_ocr.splitlines()
     for i, line in enumerate(lines):
-        if "č.p." in line.lower() or "c.p." in line.lower():
+        if _CP_PATTERN.search(line):
             city_line = lines[i - 1].strip() if i > 0 else ""
             street_line = line.strip()
             district_line = lines[i + 1].strip() if i + 1 < len(lines) else ""
@@ -286,6 +316,52 @@ def _extract_address_by_cp_anchor(raw_ocr: str) -> Optional[str]:
                 return ", ".join(parts)
 
     return None
+
+
+def _extract_address_by_label(raw_ocr: str) -> Optional[str]:
+    """
+    Záložní extrakce adresy hledáním popisku 'TRVALÝ POBYT' nebo 'PERMANENT STAY'
+    a zachycením textu až do dalšího sekce/MRZ, bez ohledu na zalomení řádků.
+
+    Funguje i tehdy, když OCR sloučí popisek a adresu na jeden řádek (PSM 6).
+    """
+    label_match = re.search(
+        r"(?:TRVAL[YÝ]\s+POBYT|PERMANENT\s+STAY)",
+        raw_ocr, re.IGNORECASE | re.UNICODE,
+    )
+    if not label_match:
+        return None
+
+    # Přeskoč zbytek řádku s popiskem (např. " / PERMANENT STAY")
+    after_label = raw_ocr[label_match.end():]
+    line_end = after_label.find("\n")
+    rest_of_label_line = after_label[:line_end].strip() if line_end != -1 else after_label.strip()
+    remainder = after_label[line_end + 1:] if line_end != -1 else ""
+
+    # Pokud na popiskovém řádku je skutečný text adresy (OCR slil popisek s adresou),
+    # použij ho jako první řádek adresy.
+    address_lines = []
+    if rest_of_label_line and not re.search(
+        r"(?:PERMANENT\s+STAY|TRVAL[YÝ])", rest_of_label_line, re.IGNORECASE | re.UNICODE
+    ):
+        address_lines.append(rest_of_label_line)
+
+    # Přidej až 3 řádky za popiskem dokud nenarazíme na MRZ nebo sekci s PODPIS/SIGNATURE
+    for line in remainder.splitlines():
+        if len(address_lines) >= 3:
+            break
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if re.search(r"(?:PODPIS|SIGNATURE|[<]{3})", stripped, re.IGNORECASE):
+            break
+        address_lines.append(stripped)
+
+    if not address_lines:
+        return None
+
+    value = _clean_field_value(" ".join(address_lines))
+    return value or None
 
 
 def _clean_field_value(raw: str) -> str:
@@ -334,8 +410,9 @@ def _strip_line_noise(value: str) -> str:
     ne na libovolná krátká velká slova, aby nedocházelo k omylům u názvů
     měst jako BRNO, CHEB nebo AŠ.
     """
-    # Odstranit úvodní číslice a interpunkci
-    value = re.sub(r"^[\d\s=+|\-]+", "", value).strip()
+    # Odstranit úvodní číslice, interpunkci a OCR šum
+    # — (dlouhá pomlčka U+2014) a ~ jsou odlišné od běžné spojovníku, časté artefakty skenů
+    value = re.sub(r"^[\d\s=+|\-—~©>]+", "", value).strip()
     # Odstranit koncové tokeny, které jsou zjevný OCR šum: malá písmena, 1–4 znaky
     value = re.sub(r"\s+[a-z]{1,4}$", "", value).strip()
     return value

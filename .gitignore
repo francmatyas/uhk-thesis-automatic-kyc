@@ -5,8 +5,3 @@ Thumbs.db
 # IDE
 .idea/
 .vscode/
-
-# Environment variables
-.env
-.env.*
-!.env.example

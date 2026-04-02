@@ -1,0 +1,6 @@
+/rabbitmq/certs/*
+!/rabbitmq/certs/.gitkeep
+/worker/certs/*
+!/worker/certs/.gitkeep
+/api/certs/*
+!/api/certs/.gitkeep

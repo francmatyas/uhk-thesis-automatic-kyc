@@ -24,6 +24,8 @@ public @interface DisplayField {
 
     String width() default ""; // Volitelné: nastaví šířku sloupce
 
+    boolean copyable() default false; // Volitelné: umožní zkopírování hodnoty kliknutím
+
     /**
      * Řetězec ve stylu URI šablony, který lze vykreslit nahrazením
      * každého `{key}` hodnotou daného pole.

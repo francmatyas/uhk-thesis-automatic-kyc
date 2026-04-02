@@ -8,9 +8,11 @@ import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.journey_template.rep
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.tenant.model.Tenant;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.tenant.repository.TenantRepository;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.verification.model.Verification;
+import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.verification.model.VerificationStatus;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.verification.repository.VerificationRepository;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.verification.service.KycJobDispatcher;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.verification.service.VerificationService;
+import com.francmatyas.uhk_thesis_automatic_kyc_api.r2_storage.R2StorageService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +21,12 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
@@ -33,27 +38,21 @@ public class BootstrapTestVerificationRunner implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(BootstrapTestVerificationRunner.class);
 
+    private static final Duration PRESIGN_TTL = Duration.ofMinutes(30);
+
     private final TenantRepository tenantRepository;
     private final JourneyTemplateRepository journeyTemplateRepository;
     private final VerificationService verificationService;
     private final VerificationRepository verificationRepository;
     private final ClientIdentityService clientIdentityService;
     private final KycJobDispatcher kycJobDispatcher;
+    private final R2StorageService storageService;
 
     @Value("${app.bootstrap.test-tenant.slug:test-tenant}")
     private String testTenantSlug;
 
-    @Value("${app.bootstrap.test-verification.doc-type:passport}")
-    private String docType;
-
-    @Value("${app.bootstrap.test-verification.front-image-path:}")
-    private String frontImagePath;
-
-    @Value("${app.bootstrap.test-verification.back-image-path:}")
-    private String backImagePath;
-
-    @Value("${app.bootstrap.test-verification.liveness-image-paths:}")
-    private List<String> livenessImagePaths;
+    @Value("${app.bootstrap.test-verification.image-key-prefix:bootstrap/test}")
+    private String imageKeyPrefix;
 
     @Value("${app.bootstrap.test-verification.first-name:Test}")
     private String firstName;
@@ -69,7 +68,7 @@ public class BootstrapTestVerificationRunner implements ApplicationRunner {
 
     @Override
     @Transactional
-    public void run(ApplicationArguments args) {
+    public void run(ApplicationArguments args) throws IOException {
         Tenant tenant = tenantRepository.findBySlug(testTenantSlug).orElse(null);
         if (tenant == null) {
             log.warn("Test verification skipped: tenant '{}' not found.", testTenantSlug);
@@ -87,17 +86,18 @@ public class BootstrapTestVerificationRunner implements ApplicationRunner {
             return;
         }
 
-        // Vytvoření verifikace
-        Verification v = Verification.builder()
-                .tenantId(tenant.getId())
-                .journeyTemplate(template)
-                .expiresAt(Instant.now().plusSeconds(3600))
-                .build();
-        var result = verificationService.create(v);
-        log.info("Test verification created: id={} token={}...", result.verification().getId(),
-                result.rawToken().substring(0, 12));
+        // Nahrají se testovací obrázky z classpath do objektového úložiště a vygeneruje presigned GET URL
+        String frontUrl = uploadAndPresign("bootstrap/test-idcard-front.jpeg", imageKeyPrefix + "/idcard-front.jpeg");
+        String backUrl  = uploadAndPresign("bootstrap/test-idcard-back.jpeg",  imageKeyPrefix + "/idcard-back.jpeg");
+        List<String> livenessUrls = List.of(
+                uploadAndPresign("bootstrap/test-liveness-center.jpg", imageKeyPrefix + "/liveness-center.jpg"),
+                uploadAndPresign("bootstrap/test-liveness-left.jpg",   imageKeyPrefix + "/liveness-left.jpg"),
+                uploadAndPresign("bootstrap/test-liveness-right.jpg",  imageKeyPrefix + "/liveness-right.jpg"),
+                uploadAndPresign("bootstrap/test-liveness-up.jpg",     imageKeyPrefix + "/liveness-up.jpg")
+        );
+        log.info("Test images uploaded and presigned (prefix={}).", imageKeyPrefix);
 
-        // Vytvoření a propojení ClientIdentity, přechod do READY_FOR_AUTOCHECK, odeslání AML
+        // Nejprve se vytvoří ClientIdentity, aby měla verifikace od začátku platný FK
         ClientIdentity pii = ClientIdentity.builder()
                 .tenantId(tenant.getId())
                 .firstName(firstName)
@@ -107,33 +107,45 @@ public class BootstrapTestVerificationRunner implements ApplicationRunner {
                 .build();
         ClientIdentity savedPii = clientIdentityService.create(pii);
 
-        Verification verification = verificationRepository.findById(result.verification().getId()).orElseThrow();
-        verification.setClientIdentity(savedPii);
-        verification.setStatus(com.francmatyas.uhk_thesis_automatic_kyc_api.modules.verification.model.VerificationStatus.READY_FOR_AUTOCHECK);
-        verificationRepository.save(verification);
+        // Vytvoří se Verification s již propojenou clientIdentity
+        Verification v = Verification.builder()
+                .tenantId(tenant.getId())
+                .journeyTemplate(template)
+                .clientIdentity(savedPii)
+                .expiresAt(Instant.now().plusSeconds(3600))
+                .build();
+        var result = verificationService.create(v);
+        log.info("Test verification created: id={} token={}...", result.verification().getId(),
+                result.rawToken().substring(0, 12));
+
+        // Přepne se stav na READY_FOR_AUTOCHECK a provede se flush před spuštěním jobů
+        Verification verification = result.verification();
+        verification.setStatus(VerificationStatus.READY_FOR_AUTOCHECK);
+        verificationRepository.saveAndFlush(verification);
 
         // AML (sankce + PEP)
         kycJobDispatcher.dispatchChecks(verification);
         log.info("AML check dispatched.");
 
-        // Kontrola dokumentu
-        if (frontImagePath != null && !frontImagePath.isBlank()) {
-            String jobType = "passport".equalsIgnoreCase(docType) ? "verify_passport" : "verify_czech_id";
-            String back = (backImagePath != null && !backImagePath.isBlank()) ? backImagePath : null;
-            kycJobDispatcher.dispatchDocumentCheck(verification, jobType, frontImagePath, back);
-            log.info("Document check dispatched: jobType={} front={} back={}", jobType, frontImagePath, back);
-        } else {
-            log.warn("No front image path set – document check not dispatched. Set app.bootstrap.test-verification.front-image-path.");
-        }
+        // Kontrola českého dokladu totožnosti
+        kycJobDispatcher.dispatchDocumentCheck(verification, "verify_czech_id", frontUrl, backUrl);
+        log.info("Document check dispatched.");
 
-        // Kontrola živosti
-        if (livenessImagePaths != null && !livenessImagePaths.isEmpty()) {
-            kycJobDispatcher.dispatchLiveness(verification, livenessImagePaths);
-            log.info("Liveness check dispatched: {} images.", livenessImagePaths.size());
-        } else {
-            log.warn("No liveness image paths set – liveness check not dispatched. Set app.bootstrap.test-verification.liveness-image-paths.");
-        }
+        // Liveness kontrola
+        kycJobDispatcher.dispatchLiveness(verification, livenessUrls);
+        log.info("Liveness check dispatched: {} frames.", livenessUrls.size());
+
+        // Porovnání obličeje – pro testovací účely použijeme center liveness snímek jako selfie
+        kycJobDispatcher.dispatchFaceMatch(verification, frontUrl, livenessUrls.get(0));
+        log.info("Face match dispatched.");
 
         log.info("Test verification setup complete: verificationId={}", verification.getId());
+    }
+
+    private String uploadAndPresign(String classpathPath, String s3Key) throws IOException {
+        byte[] bytes = new ClassPathResource(classpathPath).getInputStream().readAllBytes();
+        String contentType = classpathPath.endsWith(".png") ? "image/png" : "image/jpeg";
+        storageService.upload(s3Key, bytes, contentType);
+        return storageService.createWorkerDownloadUrl(s3Key, PRESIGN_TTL);
     }
 }

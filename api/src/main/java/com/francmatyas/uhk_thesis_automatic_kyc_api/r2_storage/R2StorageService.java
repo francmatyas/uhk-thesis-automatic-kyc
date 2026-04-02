@@ -20,17 +20,20 @@ public class R2StorageService {
 
     private final S3Client s3Client;
     private final S3Presigner presigner;
+    private final S3Presigner workerPresigner;
     private final String bucket;
     private final String publicBaseUrl;
 
     public R2StorageService(
             S3Client r2S3Client,
             S3Presigner r2S3Presigner,
+            S3Presigner r2S3WorkerPresigner,
             @Value("${storage.s3.bucket}") String bucket,
             @Value("${storage.s3.public-base-url}") String publicBaseUrl
     ) {
         this.s3Client = r2S3Client;
         this.presigner = r2S3Presigner;
+        this.workerPresigner = r2S3WorkerPresigner;
         this.bucket = bucket;
         this.publicBaseUrl = publicBaseUrl;
     }
@@ -70,7 +73,7 @@ public class R2StorageService {
                 .build();
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-                .signatureDuration(ttl) // např. Duration.ofMinutes(15)
+                .signatureDuration(ttl)
                 .putObjectRequest(objectRequest)
                 .build();
 
@@ -85,7 +88,7 @@ public class R2StorageService {
                 .build();
 
         GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
-                .signatureDuration(ttl) // např. Duration.ofHours(1)
+                .signatureDuration(ttl)
                 .getObjectRequest(objectRequest)
                 .build();
 
@@ -100,6 +103,27 @@ public class R2StorageService {
 
     public String createDownloadUrl(String key) {
         return createDownloadUrl(key, Duration.ofHours(1));
+    }
+
+    // ---------- presigned URL pro interního workera (Docker síť) ----------
+
+    public String createWorkerDownloadUrl(String key, Duration ttl) {
+        GetObjectRequest objectRequest = GetObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .build();
+
+        GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                .signatureDuration(ttl)
+                .getObjectRequest(objectRequest)
+                .build();
+
+        PresignedGetObjectRequest presigned = workerPresigner.presignGetObject(presignRequest);
+        return presigned.url().toString();
+    }
+
+    public String createWorkerDownloadUrl(String key) {
+        return createWorkerDownloadUrl(key, Duration.ofHours(1));
     }
 
     public String publicUrlForKey(String key) {

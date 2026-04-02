@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Controller, useFieldArray } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
 import { SearchSelect } from "@/components/ui/search-select";
@@ -11,6 +12,7 @@ import { Trash } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function TenantMembersSection({ tenantId, control, permission }) {
+  const { t } = useTranslation();
   const { hasPermission } = useAuth();
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedRoles, setSelectedRoles] = useState([]);
@@ -42,13 +44,17 @@ export default function TenantMembersSection({ tenantId, control, permission }) 
 
   const handleAddMember = () => {
     if (!selectedUser?.id) {
-      toast.error("Select a user first.");
+      toast.error(
+        t("moduleDefinitions.tenantMe.membersSection.validation.selectUserFirst"),
+      );
       return;
     }
 
     const alreadyAdded = fields.some((member) => member.id === selectedUser.id);
     if (alreadyAdded) {
-      toast.error("This user is already in the member list.");
+      toast.error(
+        t("moduleDefinitions.tenantMe.membersSection.validation.userAlreadyAdded"),
+      );
       return;
     }
 
@@ -66,12 +72,16 @@ export default function TenantMembersSection({ tenantId, control, permission }) 
   };
 
   return (
-    <DetailFieldsSection title="Members" columns={1}>
+    <DetailFieldsSection
+      title={t("moduleDefinitions.tenantMe.membersSection.title")}
+      columns={1}
+    >
       <div className="@container/members space-y-4">
         <div className="grid grid-cols-1 items-end gap-2 @lg/members:grid-cols-[2fr_1fr_auto]">
           <SearchSelect
             key={searchSelectResetKey}
-            label="Search user"
+            label={t("moduleDefinitions.tenantMe.membersSection.searchUser")}
+            placeholder={t("moduleDefinitions.tenantMe.membersSection.searchUser")}
             endpoint="/tenants/members/search"
             timeout={300}
             params={{ tenantId, limit: 20 }}
@@ -92,11 +102,11 @@ export default function TenantMembersSection({ tenantId, control, permission }) 
             }}
           />
           <Combobox
-            label="Roles (optional)"
+            label={t("moduleDefinitions.tenantMe.membersSection.rolesOptional")}
             value={selectedRoles}
             onChange={setSelectedRoles}
             options={roleOptions}
-            placeholder="Select roles"
+            placeholder={t("moduleDefinitions.tenantMe.membersSection.selectRoles")}
             multiple
           />
           <Button
@@ -111,7 +121,9 @@ export default function TenantMembersSection({ tenantId, control, permission }) 
 
         <div className="divide-y rounded-md border">
           {fields.length === 0 ? (
-            <div className="p-3 text-sm text-muted-foreground">No members</div>
+            <div className="p-3 text-sm text-muted-foreground">
+              {t("moduleDefinitions.tenantMe.membersSection.noMembers")}
+            </div>
           ) : (
             fields.map((member, index) => (
               <div
@@ -137,14 +149,18 @@ export default function TenantMembersSection({ tenantId, control, permission }) 
                           value={field.value || []}
                           onChange={field.onChange}
                           options={roleOptions}
-                          placeholder="Select roles"
+                          placeholder={t(
+                            "moduleDefinitions.tenantMe.membersSection.selectRoles",
+                          )}
                           multiple
                         />
                       )}
                     />
                   </div>
                   {member.isDefault && (
-                    <span className="text-xs text-muted-foreground">Default</span>
+                    <span className="text-xs text-muted-foreground">
+                      {t("moduleDefinitions.tenantMe.membersSection.default")}
+                    </span>
                   )}
                   <Button
                     type="button"

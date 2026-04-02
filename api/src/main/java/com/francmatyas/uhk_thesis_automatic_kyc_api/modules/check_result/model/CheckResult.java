@@ -4,12 +4,11 @@ import com.francmatyas.uhk_thesis_automatic_kyc_api.model.BaseEntity;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.tenant.model.TenantScopedEntity;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.verification.model.Verification;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.vladmihalcea.hibernate.type.json.JsonType;
+import com.francmatyas.uhk_thesis_automatic_kyc_api.security.crypto.EncryptedJsonNodeConverter;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.annotations.Type;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -53,8 +52,8 @@ public class CheckResult extends BaseEntity implements TenantScopedEntity {
     @Column(precision = 6, scale = 4)
     private BigDecimal score;
 
-    /** Surový výstup z Python workeru – diagnostika, metriky apod. */
-    @Type(JsonType.class)
-    @Column(name = "details_json", columnDefinition = "jsonb")
+    /** Surový výstup z Python workeru – diagnostika, metriky apod. Šifrované při uložení. */
+    @Convert(converter = EncryptedJsonNodeConverter.class)
+    @Column(name = "details_json", columnDefinition = "text")
     private JsonNode detailsJson;
 }

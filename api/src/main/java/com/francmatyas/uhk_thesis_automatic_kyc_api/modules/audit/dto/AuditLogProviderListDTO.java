@@ -18,18 +18,24 @@ public class AuditLogProviderListDTO {
     @DisplayField(header = "Id", order = 1, hidden = true, sortable = false, filterable = false)
     private String id;
 
-    @DisplayField(header = "Event", order = 2, type = DisplayFieldType.REFERENCE, referenceKey = "id", referenceTemplate = "/p/audit-logs/{id}")
+    @DisplayField(header = "moduleDefinitions.auditLogs.columns.event", order = 2, type = DisplayFieldType.REFERENCE, referenceKey = "id", referenceTemplate = "/p/audit-logs/{id}")
     private String action;
 
-    @DisplayField(header = "Time", order = 3, type = DisplayFieldType.DATETIME, sortable = true, filterable = false)
+    @DisplayField(header = "moduleDefinitions.auditLogs.columns.timestamp", order = 3, type = DisplayFieldType.DATETIME, sortable = true, filterable = false)
     private Instant createdAt;
 
-    @DisplayField(header = "Actor", order = 4, type = DisplayFieldType.ENUM)
+    @DisplayField(header = "moduleDefinitions.auditLogs.columns.actor", order = 4, type = DisplayFieldType.ENUM)
     private String actorType;
 
-    @DisplayField(header = "Entity", order = 5)
+    @DisplayField(header = "moduleDefinitions.auditLogs.columns.entity", order = 5)
     private String entityType;
 
-    @DisplayField(header = "Result", order = 6, type = DisplayFieldType.ENUM)
+    @DisplayField(header = "moduleDefinitions.auditLogs.columns.result", order = 6, type = DisplayFieldType.ENUM)
     private String result;
+
+    @DisplayField(header = "actorUserId", order = 7, hidden = true, sortable = false, filterable = false)
+    private String actorUserId;
+
+    @DisplayField(header = "moduleDefinitions.auditLogs.columns.actorUser", order = 8, type = DisplayFieldType.REFERENCE, referenceKey = "actorUserId", referenceTemplate = "/p/users/{actorUserId}", sortable = false, filterable = false)
+    private String actorUserName;
 }

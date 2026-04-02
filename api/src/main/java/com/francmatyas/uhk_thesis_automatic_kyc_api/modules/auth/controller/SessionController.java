@@ -7,6 +7,7 @@ import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.auth.service.UserSes
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,7 @@ public class SessionController {
 
     @GetMapping
     public ResponseEntity<?> list(@AuthenticationPrincipal User me) {
+        if (me == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         List<UserSession> list = sessions.listActiveSessions(me.getId());
         // Mapování entit do bezpečných map podobných DTO
         List<Map<String, Object>> items = list.stream().map(s -> {
@@ -52,6 +54,7 @@ public class SessionController {
 
     @PostMapping("/revoke")
     public ResponseEntity<?> revokeOne(@AuthenticationPrincipal User me, @RequestBody RevokeRequest req, HttpServletRequest httpReq) {
+        if (me == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         boolean success = sessions.revokeByJtiForUser(me.getId(), req.jti, "USER_REVOKED");
         try {
             String ip = httpReq.getHeader("CF-Connecting-IP");
@@ -68,6 +71,7 @@ public class SessionController {
 
     @PostMapping("/revoke-all")
     public ResponseEntity<?> revokeAll(@AuthenticationPrincipal User me, HttpServletRequest httpReq) {
+        if (me == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         int count = sessions.revokeAllForUser(me.getId(), "USER_REVOKED_ALL");
         try {
             String ip = httpReq.getHeader("CF-Connecting-IP");

@@ -1,5 +1,6 @@
 package com.francmatyas.uhk_thesis_automatic_kyc_api.modules.client_identity.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.model.BaseEntity;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.tenant.model.TenantScopedEntity;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.security.crypto.EncryptedStringConverter;
@@ -10,6 +11,7 @@ import org.hibernate.annotations.SQLRestriction;
 
 import java.util.UUID;
 
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(
         name = "client_identities",

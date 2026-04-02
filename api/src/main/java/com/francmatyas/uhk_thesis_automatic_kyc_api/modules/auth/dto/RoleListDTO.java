@@ -15,12 +15,12 @@ public class RoleListDTO {
     @DisplayField(header = "Id", order = 1, hidden = true, sortable = false, filterable = false)
     private String id;
 
-    @DisplayField(header = "Name", order = 2, type = DisplayFieldType.REFERENCE, referenceKey = "id", referenceTemplate = "/p/roles/{id}")
+    @DisplayField(header = "moduleDefinitions.roles.columns.name", order = 2, type = DisplayFieldType.REFERENCE, referenceKey = "id", referenceTemplate = "/p/roles/{id}")
     private String slug;
 
-    @DisplayField(header = "Scope", order = 3)
+    @DisplayField(header = "moduleDefinitions.roles.columns.scope", order = 3)
     private String scope;
 
-    @DisplayField(header = "Priority", order = 4)
+    @DisplayField(header = "moduleDefinitions.roles.columns.priority", order = 4)
     private int priority;
 }

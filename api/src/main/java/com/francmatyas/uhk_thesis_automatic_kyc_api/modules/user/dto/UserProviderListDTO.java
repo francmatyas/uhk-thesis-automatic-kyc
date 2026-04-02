@@ -15,9 +15,9 @@ public class UserProviderListDTO {
     @DisplayField(header = "Id", order = 1, hidden = true, sortable = false, filterable = false)
     private String id;
 
-    @DisplayField(header = "Name", order = 2, type = DisplayFieldType.REFERENCE, referenceKey = "id", referenceTemplate = "/p/users/{id}")
+    @DisplayField(header = "moduleDefinitions.users.columns.name", order = 2, type = DisplayFieldType.REFERENCE, referenceKey = "id", referenceTemplate = "/p/users/{id}")
     private String fullName;
 
-    @DisplayField(header = "Email", order = 3)
+    @DisplayField(header = "moduleDefinitions.users.columns.email", order = 3)
     private String email;
 }

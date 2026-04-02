@@ -19,7 +19,13 @@ from typing import Optional
 
 from passporteye.mrz.text import MRZ
 
-from .mrz_reader import read_mrz_enhanced, clean_name, correct_country_code
+from .mrz_reader import (
+    read_mrz_enhanced,
+    clean_name,
+    recover_given_names,
+    correct_country_code,
+    yymmdd_to_iso,
+)
 from ..errors import WorkerError
 
 
@@ -28,9 +34,9 @@ class PassportResult:
     # Základní identifikační údaje (z MRZ)
     surname: str
     given_names: str
-    date_of_birth: str          # YYMMDD
+    date_of_birth: str          # ISO 8601 YYYY-MM-DD
     sex: str                    # M / F / X
-    expiration_date: str        # YYMMDD
+    expiration_date: str        # ISO 8601 YYYY-MM-DD
     document_number: str
 
     # Geografické údaje
@@ -88,8 +94,28 @@ def parse_passport(mrz: MRZ) -> PassportResult:
         notes.append("UNEXPECTED_DOC_TYPE")
 
     # ── Základní identifikační údaje ─────────────────────────────────────
-    surname = clean_name(d.get("surname", ""))
-    given_names = clean_name(d.get("names", ""))
+    raw_surname = d.get("surname", "")
+    raw_names = d.get("names", "")
+    surname = clean_name(raw_surname)
+    given_names = clean_name(raw_names)
+
+    # Záchrana úroveň 1: OCR přečetl '<<' jako '<šum<' — jména jsou za šumovým
+    # tokenem uvnitř pole příjmení (např. "FRANC K MATYAS" → names="MATYAS").
+    if not given_names:
+        given_names = recover_given_names(raw_surname)
+
+    # Záchrana úroveň 2: OCR sloučil '<<' přímo do příjmení bez šumového tokenu
+    # (např. "FRANC<<MATYAS" → "FRANCK<MATYAS" → surname="FRANCK MATYAS", names=filler).
+    # Podmínka raw_names.strip() zajistí, že jsme zde jen pokud pole jmen mělo obsah
+    # (= oddělovač '<<' existoval, jen byl detekován na špatném místě), a zabránění
+    # falešné aktivaci pro víceoslovná příjmení bez daných jmen.
+    if not given_names and " " in surname and raw_names.strip():
+        parts = surname.rsplit(" ", 1)
+        candidate = parts[1]
+        if len(candidate) >= 2 and candidate.isalpha():
+            given_names = candidate
+            surname = parts[0]
+
     dob = d.get("date_of_birth", "")
     sex = d.get("sex", "")
     expiry = d.get("expiration_date", "")
@@ -129,9 +155,9 @@ def parse_passport(mrz: MRZ) -> PassportResult:
     return PassportResult(
         surname=surname,
         given_names=given_names,
-        date_of_birth=dob,
+        date_of_birth=yymmdd_to_iso(dob, future=False),
         sex=sex,
-        expiration_date=expiry,
+        expiration_date=yymmdd_to_iso(expiry, future=True),
         document_number=doc_number,
         issuing_country=issuing_country,
         nationality=nationality,

@@ -30,12 +30,20 @@ const badgeVariants = cva(
           "bg-red-700 text-red-900 border-red-200 dark:bg-red-700 dark:text-red-50 dark:border-red-500",
         queued:
           "bg-yellow-600 text-yellow-900 border-yellow-200 dark:bg-yellow-500 dark:text-yellow-50 dark:border-yellow-500",
+        success:
+          "bg-green-700 text-green-900 border-green-200 dark:bg-green-700 dark:text-green-50 dark:border-green-500",
+        warning:
+          "bg-orange-600 text-orange-900 border-orange-200 dark:bg-orange-500 dark:text-orange-50 dark:border-orange-500",
+        default:
+          "bg-gray-600 text-gray-50 border-gray-300 dark:bg-gray-700 dark:border-gray-500",
+        error:
+          "bg-red-700 text-red-900 border-red-200 dark:bg-red-700 dark:text-red-50 dark:border-red-500",
       },
     },
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 function Badge({ className, variant, status, asChild = false, ...props }) {

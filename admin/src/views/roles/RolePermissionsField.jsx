@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { fetchPermissionsForRoles } from "@/api/provider/permissions";
 import { queryKeys } from "@/modules/queryKeys";
 import { Label } from "@/components/ui/label";
@@ -100,7 +101,8 @@ export default function RolePermissionsField({
   control,
   readOnly = false,
   name = "permissions",
-  label = "Permissions",
+  label = "moduleDefinitions.roles.permissionsMatrix.label",
+  roleScope,
 }) {
   const [query, setQuery] = useState("");
 
@@ -109,7 +111,21 @@ export default function RolePermissionsField({
     queryFn: () => fetchPermissionsForRoles({ size: 500 }),
   });
 
-  const matrix = useMemo(() => buildPermissionMatrix(data?.rows), [data]);
+  const scopedRows = useMemo(() => {
+    const scope = String(roleScope || "").toLowerCase();
+    const rows = Array.isArray(data?.rows) ? data.rows : [];
+
+    if (scope !== "tenant" && scope !== "provider") return rows;
+
+    return rows.filter((permission) => {
+      const parsed = parseResourceAndAction(permission);
+      const resource = String(parsed?.resource || "").toLowerCase();
+      if (!resource) return false;
+      return resource.startsWith(`${scope}.`);
+    });
+  }, [data, roleScope]);
+
+  const matrix = useMemo(() => buildPermissionMatrix(scopedRows), [scopedRows]);
 
   return (
     <Controller
@@ -139,6 +155,7 @@ function RolePermissionsMatrix({
   matrix,
   isLoading,
 }) {
+  const { t } = useTranslation();
   const selectedValues = normalizePermissionsArray(field.value);
 
   const filteredRows = matrix.matrixRows.filter((row) =>
@@ -185,12 +202,14 @@ function RolePermissionsMatrix({
 
   return (
     <div className="flex flex-col gap-2">
-      <Label className="ml-0.5 text-xs font-medium">{label}</Label>
+      <Label className="ml-0.5 text-xs font-medium">
+        {t(label, { defaultValue: label })}
+      </Label>
 
       <Input
         value={query}
         onChange={(event) => onQueryChange(event.target.value)}
-        placeholder="Search modules..."
+        placeholder={t("moduleDefinitions.roles.permissionsMatrix.searchPlaceholder")}
         disabled={readOnly}
       />
 
@@ -205,7 +224,7 @@ function RolePermissionsMatrix({
                     onCheckedChange={toggleAllVisible}
                     disabled={readOnly || allPermissionIds.length === 0}
                   />
-                  <span>Module</span>
+                  <span>{t("moduleDefinitions.roles.permissionsMatrix.module")}</span>
                 </label>
               </th>
               {matrix.actions.map((action) => {
@@ -226,7 +245,12 @@ function RolePermissionsMatrix({
                         onCheckedChange={() => toggleColumn(action)}
                         disabled={readOnly || colIds.length === 0}
                       />
-                      <span>{capitalize(action)}</span>
+                      <span>
+                        {t(
+                          `moduleDefinitions.roles.permissionsMatrix.actions.${action}`,
+                          { defaultValue: capitalize(action) },
+                        )}
+                      </span>
                     </label>
                   </th>
                 );
@@ -240,7 +264,7 @@ function RolePermissionsMatrix({
                   colSpan={1 + matrix.actions.length}
                   className="px-3 py-4 text-sm text-muted-foreground"
                 >
-                  Loading permissions...
+                  {t("moduleDefinitions.roles.permissionsMatrix.loading")}
                 </td>
               </tr>
             )}
@@ -251,7 +275,7 @@ function RolePermissionsMatrix({
                   colSpan={1 + matrix.actions.length}
                   className="px-3 py-4 text-sm text-muted-foreground"
                 >
-                  No modules found.
+                  {t("moduleDefinitions.roles.permissionsMatrix.noModules")}
                 </td>
               </tr>
             )}

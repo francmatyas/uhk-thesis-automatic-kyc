@@ -57,7 +57,7 @@ class PolicyServiceTenantTests {
     }
 
     @Test
-    void providerUserWithActiveTenantGetsProviderAndTenantRoles() {
+    void providerUserWithActiveTenantGetsTenantRolesOnly() {
         UUID userId = UUID.randomUUID();
         UUID tenantId = UUID.randomUUID();
         TenantContext.setTenantId(tenantId);
@@ -71,14 +71,6 @@ class PolicyServiceTenantTests {
 
         UserTenantRoleRepository utrRepo = mock(UserTenantRoleRepository.class);
 
-        UserTenantRole providerAssignment = new UserTenantRole();
-        providerAssignment.setUser(u);
-        providerAssignment.setTenant(null);
-        Role providerRole = new Role();
-        providerRole.setName("PROVIDER_ADMIN");
-        providerRole.setScope(RoleScope.PROVIDER);
-        providerAssignment.setRole(providerRole);
-
         Tenant t = new Tenant();
         t.setId(tenantId);
 
@@ -90,15 +82,15 @@ class PolicyServiceTenantTests {
         tenantRole.setScope(RoleScope.TENANT);
         tenantAssignment.setRole(tenantRole);
 
-        when(utrRepo.findAllByUserIdAndTenantId(userId, null)).thenReturn(List.of(providerAssignment));
         when(utrRepo.findAllByUserIdAndTenantId(userId, tenantId)).thenReturn(List.of(tenantAssignment));
 
         PolicyService svc = new PolicyService(userRepo, utrRepo);
         var snap = svc.buildForUser(userId);
 
-        assertEquals(List.of("PROVIDER_ADMIN", "TENANT_OPERATOR"), snap.roles());
+        // Přepnutý do tenant kontextu — pouze tenant role, žádné provider role.
+        assertEquals(List.of("TENANT_OPERATOR"), snap.roles());
 
-        verify(utrRepo, times(1)).findAllByUserIdAndTenantId(userId, null);
+        verify(utrRepo, never()).findAllByUserIdAndTenantId(userId, null);
         verify(utrRepo, times(1)).findAllByUserIdAndTenantId(userId, tenantId);
     }
 

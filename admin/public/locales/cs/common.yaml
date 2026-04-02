@@ -1,0 +1,564 @@
+shared:
+  table:
+    unableToLoadData: Nepodařilo se načíst data
+    accessDenied: Přístup odepřen
+    somethingWentWrong: Došlo k chybě
+    permissionDenied: Oprávnění odmítnuto
+    noResults: Nebyly nalezeny žádné výsledky
+    noDataForFilter: Pro vybrané filtry nejsou žádná data
+    search: Hledat...
+    filterableColumns: Filtrovatelné sloupce
+    filterByColumns: Filtrovat podle sloupců
+  resourceDetail:
+    errorPrefix: Chyba
+    actions:
+      create: Vytvořit
+      saveChanges: Uložit změny
+      delete: Smazat
+  relationField:
+    empty: "—"
+    openDetail: Otevřít detail
+    change: Změnit
+    clear: Vymazat
+    searchPlaceholder: Hledat...
+
+menu:
+  provider:
+    dashboard: Dashboard
+    verifications: Ověření
+    journeyTemplates: Šablony procesu
+    management: Správa
+    users: Uživatelé
+    tenants: Tenanti
+    roles: Role
+    permissions: Oprávnění
+    auditLogs: Auditní logy
+  tenant:
+    dashboard: Dashboard
+    verifications: Ověření
+    journeyTemplates: Šablony procesu
+    administration: Administrace
+    teamSettings: Nastavení týmu
+    members: Členové
+    apiKeys: API klíče
+    webhooks: Webhooky
+    auditLogs: Auditní logy
+
+sidebar:
+  userMenu:
+    profile: Profil
+    settings: Nastavení
+    logout: Odhlásit se
+  tenantSwitch:
+    provider: Provider
+    tenant: Tenant
+    fallbackInitial: T
+    tenantWorkspace: Prostor tenanta
+    providerWorkspace: Prostor providera
+    switchWorkspace: Přepnout prostor
+    switchFailed: Nepodařilo se přepnout rozsah. Zkuste to prosím znovu.
+  groups:
+    title: Skupiny
+    expand: Rozbalit
+    collapse: Sbalit
+    loadFailed: Nepodařilo se načíst skupiny.
+    retry: Opakovat
+    allItems: "Všechny {{module}}"
+    empty: Nebyly nalezeny žádné skupiny.
+    createNew: Vytvořit novou skupinu
+    newGroup: Nová skupina
+    context:
+      pin: Připnout
+      unpin: Odepnout
+      edit: Upravit
+      delete: Smazat
+    dialog:
+      editTitle: Upravit skupinu
+      newTitle: Nová skupina
+      editDescription: Upravte skupinu pro organizaci {{module}}.
+      createDescription: Vytvořte novou skupinu pro organizaci {{module}}.
+      groupNamePlaceholder: Název skupiny
+      saveChanges: Uložit změny
+      create: Vytvořit
+
+moduleDefinitions:
+  auditLogs:
+    search: Hledat auditní logy...
+    columns:
+      event: Událost
+      actorUser: Uživatel
+      timestamp: Časové razítko
+      actor: Aktér
+      entity: Entita
+      result: Výsledek
+      action: Akce
+    detailFields:
+      action: Akce
+      actorType: Typ aktora
+      entityType: Typ entity
+      status: Stav
+      errorCode: Kód chyby
+      timestamp: Časové razítko
+      result: Výsledek
+    enums:
+      result:
+        success: Úspěch
+        failure: Selhání
+      actor:
+        user: Uživatel
+        system: Systém
+        api_key: API klíč
+        service: Služba
+  roles:
+    search: Hledat role...
+    createLabel: Nová role
+    actions:
+      create: Vytvořit roli
+      save: Uložit změny
+      delete: Smazat
+    columns:
+      scope: Rozsah
+      name: Název
+      priority: Priorita
+    detailFields:
+      scope: Rozsah
+      tenant: Tenant
+      provider: Provider
+      name: Název
+      description: Popis
+      resource: Zdroj
+      action: Akce
+    permissionsMatrix:
+      label: Oprávnění
+      searchPlaceholder: Hledat moduly...
+      module: Modul
+      loading: Načítání oprávnění...
+      noModules: Nebyly nalezeny žádné moduly.
+      actions:
+        create: Vytvořit
+        read: Číst
+        update: Aktualizovat
+        delete: Smazat
+    enums:
+      scope:
+        provider: Provider
+        tenant: Tenant
+      action:
+        create: Vytvořit
+        read: Číst
+        update: Aktualizovat
+        delete: Smazat
+    messages:
+      confirmDelete: Opravdu chcete smazat tuto roli?
+      success:
+        create: Role byla úspěšně vytvořena.
+        update: Role byla úspěšně aktualizována.
+        remove: Role byla úspěšně smazána.
+      error:
+        save: Nepodařilo se uložit roli.
+        remove: Nepodařilo se smazat roli.
+  permissions:
+    search: Hledat oprávnění...
+    createLabel: Nové oprávnění
+    actions:
+      create: Vytvořit oprávnění
+      save: Uložit změny
+      delete: Smazat
+    columns:
+      label: Oprávnění
+      description: Popis
+    detailFields:
+      resource: Zdroj
+      action: Akce
+      description: Popis
+    enums:
+      action:
+        create: Vytvořit
+        read: Číst
+        update: Aktualizovat
+        delete: Smazat
+    messages:
+      confirmDelete: Opravdu chcete smazat toto oprávnění?
+      success:
+        create: Oprávnění bylo úspěšně vytvořeno.
+        update: Oprávnění bylo úspěšně aktualizováno.
+        remove: Oprávnění bylo úspěšně smazáno.
+      error:
+        save: Nepodařilo se uložit oprávnění.
+        remove: Nepodařilo se smazat oprávnění.
+  tenants:
+    search: Hledat tenanty...
+    createLabel: Nový tenant
+    actions:
+      create: Vytvořit tenanta
+      save: Uložit změny
+      delete: Smazat
+    columns:
+      name: Název
+      slug: Slug
+      status: Stav
+    detailFields:
+      name: Název
+      slug: Slug
+      status: Stav
+    enums:
+      status:
+        active: Aktivní
+        suspended: Pozastavený
+    messages:
+      confirmDelete: Opravdu chcete smazat tohoto tenanta?
+      success:
+        create: Tenant byl úspěšně vytvořen.
+        update: Tenant byl úspěšně aktualizován.
+        remove: Tenant byl úspěšně smazán.
+      error:
+        save: Nepodařilo se uložit tenanta.
+        remove: Nepodařilo se smazat tenanta.
+  tenantMe:
+    actions:
+      save: Uložit změny
+    columns:
+      name: Název
+      slug: Slug
+    detailFields:
+      name: Název
+      slug: Slug
+    messages:
+      confirmDelete: Mazání nastavení tenanta není podporováno.
+      success:
+        create: Nastavení týmu bylo úspěšně uloženo.
+        update: Nastavení týmu bylo úspěšně aktualizováno.
+        remove: Nastavení týmu bylo úspěšně odebráno.
+      error:
+        save: Nepodařilo se uložit nastavení týmu.
+        remove: Nepodařilo se odebrat nastavení týmu.
+    membersSection:
+      title: Členové
+      searchUser: Hledat uživatele
+      rolesOptional: Role (volitelné)
+      selectRoles: Vyberte role
+      noMembers: Žádní členové
+      default: Výchozí
+      validation:
+        selectUserFirst: Nejprve vyberte uživatele.
+        userAlreadyAdded: Tento uživatel už je v seznamu členů.
+    sectionTitle: Nastavení týmu
+  verifications:
+    search: Hledat ověření...
+    columns:
+      clientIdentity: Identita klienta
+      status: Stav
+      tenant: Tenant
+      journeyTemplate: Šablona procesu
+      expiresAt: Vyprší
+      createdAt: Vytvořeno
+    detailFields:
+      tenant: Tenant
+      tenantId: Tenant ID
+      journeyTemplate: Šablona procesu
+      expiresAt: Vyprší
+      completedAt: Dokončeno
+      createdAt: Vytvořeno
+      status: Stav
+      steps: Kroky
+      score: Skóre
+    enums:
+      status:
+        initiated: Inicializováno
+        inProgress: Probíhá
+        readyForAutoCheck: Připraveno pro automatickou kontrolu
+        autoPassed: Automatická kontrola úspěšná
+        autoFailed: Automatická kontrola neúspěšná
+        requiresReview: Vyžaduje kontrolu
+        approved: Schváleno
+        rejected: Zamítnuto
+        expired: Expirováno
+    review:
+      approve: Schválit
+      reject: Zamítnout
+      approveSuccess: Ověření bylo schváleno
+      rejectSuccess: Ověření bylo zamítnuto
+      approveError: Nepodařilo se schválit ověření
+      rejectError: Nepodařilo se zamítnout ověření
+    verificationDetail:
+      clientIdentity:
+        title: Identita klienta
+        passport: Pas
+        czechRepublic: Česká republika
+        identityCard: Občanský průkaz
+        front: Přední strana
+        back: Zadní strana
+        values:
+          passport: P
+        fields:
+          surname: Příjmení
+          passportNo: Číslo pasu
+          givenNames: Jména
+          personalNo: Rodné číslo
+          nationality: Státní příslušnost
+          sex: Pohlaví
+          type: Typ
+          dateOfBirth: Datum narození
+          expiry: Platnost do
+          cardNo: Číslo dokladu
+          validUntil: Platný do
+          placeOfBirth: Místo narození
+          nationalNo: Rodné číslo
+          address: Adresa
+          countryOfResidence: Země pobytu
+      steps:
+        title: Kroky ověření
+        score: Skóre
+        stepStatus:
+          COMPLETED: Dokončeno
+          FAILED: Selhalo
+          PENDING: Čeká
+          SKIPPED: Přeskočeno
+          WARNING: Varování
+        checkStatus:
+          PASSED: Úspěšně
+          FAILED: Selhalo
+          PENDING: Čeká
+          ERROR: Chyba
+          WARNING: Varování
+        stepType:
+          personalInfo: Osobní údaje
+          docOcr: OCR dokladu
+          faceMatch: Shoda obličeje
+          livenessDetection: Kontrola živosti
+          amlScreening: AML kontrola
+          amlQuestionnaire: AML dotazník
+          emailVerification: Ověření e-mailu
+          phoneVerification: Ověření telefonu
+        checkType:
+          personalInfo: Osobní údaje
+          docDataMatch: Shoda dat dokladu
+          docOcr: OCR dokladu
+          faceMatch: Shoda obličeje
+          liveness: Živost
+          sanctions: Sankce
+          pep: PEP
+          emailVerification: Ověření e-mailu
+          phoneVerification: Ověření telefonu
+          amlQuestionnaire: AML dotazník
+      riskScore:
+        title: Rizikové skóre
+        overallScore: Celkové skóre
+        level: Úroveň rizika
+        weightedAverage: Vážený průměr
+        levels:
+          LOW: Nízké
+          MEDIUM: Střední
+          HIGH: Vysoké
+      statusTimeline:
+        initiated: Inicializováno
+        inProgress: Probíhá
+        autoCheck: Automatická kontrola
+        autoPassed: Automatická kontrola úspěšná
+        autoFailed: Automatická kontrola neúspěšná
+        inReview: V kontrole
+        approved: Schváleno
+        rejected: Zamítnuto
+        expired: Expirováno
+  journeyTemplates:
+    search: Hledat šablony procesu...
+    createLabel: Nová šablona
+    actions:
+      create: Vytvořit šablonu
+      save: Uložit změny
+      delete: Smazat
+    columns:
+      name: Název
+      status: Stav
+      tenant: Tenant
+      createdAt: Vytvořeno
+    detailFields:
+      id: ID
+      name: Název
+      status: Stav
+      description: Popis
+      configJson: Konfigurační JSON
+    configJsonEditor:
+      labels:
+        allowedDocumentTypes: Povolené typy dokladů
+        optionalSteps: Volitelné kroky
+      documentTypes:
+        czechId: Občanský průkaz
+        passport: Pas
+      optionalSteps:
+        emailVerification: Ověření e-mailu
+        phoneVerification: Ověření telefonu
+        amlQuestionnaire: AML dotazník
+      noneConfigured: Není nastaveno
+      toggleHint: Kliknutím přepnete volby zapnuto/vypnuto
+    enums:
+      status:
+        active: Aktivní
+        archived: Archivováno
+    messages:
+      confirmDelete: Opravdu chcete smazat tuto šablonu procesu?
+      success:
+        create: Šablona procesu byla úspěšně vytvořena.
+        update: Šablona procesu byla úspěšně aktualizována.
+        remove: Šablona procesu byla úspěšně smazána.
+      error:
+        save: Nepodařilo se uložit šablonu procesu.
+        remove: Nepodařilo se smazat šablonu procesu.
+  apiKeys:
+    search: Hledat API klíče...
+    createLabel: Nový API klíč
+    actions:
+      create: Vytvořit API klíč
+      save: Uložit změny
+      delete: Smazat
+    columns:
+      name: Název
+      status: Stav
+      publicKey: Veřejný klíč
+      lastUsedAt: Naposledy použito
+      createdAt: Vytvořeno
+    detailFields:
+      name: Název
+      status: Stav
+      publicKey: Veřejný klíč
+      lastUsedAt: Naposledy použito
+      createdAt: Vytvořeno
+    enums:
+      status:
+        active: Aktivní
+        revoked: Zneplatněno
+    messages:
+      confirmDelete: Opravdu chcete zneplatnit tento API klíč?
+      success:
+        create: API klíč byl úspěšně vytvořen.
+        update: API klíč byl úspěšně aktualizován.
+        remove: API klíč byl úspěšně zneplatněn.
+      error:
+        save: Nepodařilo se uložit API klíč.
+        remove: Nepodařilo se zneplatnit API klíč.
+    createWizard:
+      trigger: Nový API klíč
+      dialog:
+        title: Vytvořit API klíč
+        description: Zadejte název. Secret se po vytvoření zobrazí pouze jednou.
+      fields:
+        name: Název
+        namePlaceholder: např. Klíč pro moji aplikaci
+      actions:
+        cancel: Zrušit
+        create: Vytvořit
+        close: Zavřít
+        openDetail: Otevřít detail
+      validation:
+        nameRequired: Název API klíče je povinný.
+      created:
+        title: Uložte si API secret
+        description: Tento secret se zobrazí pouze jednou a už nebude znovu dostupný.
+        publicKey: Veřejný klíč
+        secret: Secret
+        notReturned: API nevrátilo hodnotu
+      toasts:
+        errorCreate: Nepodařilo se vytvořit API klíč. Zkuste to prosím znovu.
+  webhooks:
+    search: Hledat webhooky...
+    createLabel: Nový webhook
+    actions:
+      create: Vytvořit webhook
+      save: Uložit změny
+      delete: Smazat
+    columns:
+      url: URL
+      status: Stav
+      lastDeliveryAt: Poslední doručení
+      createdAt: Vytvořeno
+    detailFields:
+      url: URL
+      status: Stav
+      lastDeliveryAt: Poslední doručení
+      createdAt: Vytvořeno
+    enums:
+      status:
+        active: Aktivní
+        disabled: Zakázáno
+    messages:
+      confirmDelete: Opravdu chcete smazat tento webhook?
+      success:
+        create: Webhook byl úspěšně vytvořen.
+        update: Webhook byl úspěšně aktualizován.
+        remove: Webhook byl úspěšně smazán.
+      error:
+        save: Nepodařilo se uložit webhook.
+        remove: Nepodařilo se smazat webhook.
+    createWizard:
+      trigger: Nový webhook
+      dialog:
+        title: Vytvořit webhook
+        description: Zadejte cílovou URL a podpisový secret.
+      fields:
+        url: URL
+        urlPlaceholder: https://example.com/webhooks/endpoint
+        secret: Secret
+        secretPlaceholder: whsec_...
+        secretHint: Délka secretu musí být mezi 16 a 255 znaky.
+        eventTypes: Typy událostí
+        noEventTypes: Nejsou dostupné žádné typy událostí.
+      actions:
+        cancel: Zrušit
+        create: Vytvořit
+        close: Zavřít
+        openDetail: Otevřít detail
+      validation:
+        urlRequired: URL webhooku je povinná.
+        secretRequired: Secret webhooku je povinný.
+        secretLength: Secret webhooku musí mít délku mezi 16 a 255 znaky.
+        eventTypeRequired: Vyberte alespoň jeden typ události.
+      created:
+        title: Webhook byl vytvořen
+        description: Váš webhook byl úspěšně vytvořen.
+      toasts:
+        errorCreate: Nepodařilo se vytvořit webhook. Zkuste to prosím znovu.
+  members:
+    search: Hledat členy...
+    actions:
+      save: Uložit změny
+    columns:
+      name: Jméno
+      email: E-mail
+    detailFields:
+      givenName: Jméno
+      familyName: Příjmení
+      email: E-mail
+    messages:
+      confirmDelete: Odebírání členů není podporováno.
+      success:
+        update: Člen byl úspěšně aktualizován.
+      error:
+        save: Nepodařilo se uložit člena.
+  users:
+    search: Hledat uživatele...
+    actions:
+      create: Vytvořit uživatele
+      save: Uložit změny
+      delete: Smazat
+    columns:
+      name: Jméno
+      email: E-mail
+    detailFields:
+      givenName: Jméno
+      familyName: Příjmení
+      email: E-mail
+      gender: Pohlaví
+      male: Muž
+      female: Žena
+      other: Jiné
+    messages:
+      confirmDelete: Opravdu chcete smazat tohoto uživatele?
+      success:
+        create: Uživatel byl úspěšně vytvořen.
+        update: Uživatel byl úspěšně aktualizován.
+        remove: Uživatel byl úspěšně smazán.
+      error:
+        save: Nepodařilo se uložit uživatele.
+        remove: Nepodařilo se smazat uživatele.
+  sectionTitle:
+    tenant: Tenant

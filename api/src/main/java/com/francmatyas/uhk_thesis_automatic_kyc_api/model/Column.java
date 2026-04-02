@@ -28,8 +28,10 @@ public class Column {
     private final String referenceTemplate;
     @Getter
     private final String width;
+    @Getter
+    private final boolean copyable;
 
-    public Column(String header, int order, DisplayFieldType type, boolean hidden, boolean sortable, boolean filterable, String referenceKey, String referenceTemplate, String width, Field field) {
+    public Column(String header, int order, DisplayFieldType type, boolean hidden, boolean sortable, boolean filterable, String referenceKey, String referenceTemplate, String width, boolean copyable, Field field) {
         this.header = header;
         this.order = order;
         this.type = type;
@@ -37,10 +39,10 @@ public class Column {
         this.hidden = hidden;
         this.sortable = sortable;
         this.filterable = filterable;
-
         this.referenceKey = referenceKey;
         this.referenceTemplate = referenceTemplate;
         this.width = width;
+        this.copyable = copyable;
         this.accessorKey = field.getName();
         this.field.setAccessible(true);
     }

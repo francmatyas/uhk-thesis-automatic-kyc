@@ -15,9 +15,7 @@ public record CheckResultResponse(
         CheckType checkType,
         CheckResultStatus status,
         BigDecimal score,
-        JsonNode detailsJson,
-        Instant createdAt,
-        Instant updatedAt
+        JsonNode detailsJson
 ) {
     public static CheckResultResponse from(CheckResult r) {
         return new CheckResultResponse(
@@ -26,9 +24,7 @@ public record CheckResultResponse(
                 r.getCheckType(),
                 r.getStatus(),
                 r.getScore(),
-                r.getDetailsJson(),
-                r.getCreatedAt(),
-                r.getUpdatedAt()
+                r.getDetailsJson()
         );
     }
 }

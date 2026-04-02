@@ -116,9 +116,6 @@ public class BootstrapAuthorizationCatalogRunner implements ApplicationRunner {
                 new PermissionSeed("provider.roles", "update", "Update roles"),
                 new PermissionSeed("provider.roles", "delete", "Delete roles"),
                 new PermissionSeed("provider.permissions", "read", "View permissions"),
-                new PermissionSeed("provider.permissions", "create", "Create permissions"),
-                new PermissionSeed("provider.permissions", "update", "Update permissions"),
-                new PermissionSeed("provider.permissions", "delete", "Delete permissions"),
                 new PermissionSeed("provider.audit-logs", "read", "View platform audit logs"),
                 // Oblast tenanta
                 new PermissionSeed("tenant.tenants", "read", "View active tenant details"),
@@ -140,6 +137,8 @@ public class BootstrapAuthorizationCatalogRunner implements ApplicationRunner {
                 new PermissionSeed("tenant.audit-logs", "read", "View tenant audit logs"),
                 // KYC oblast poskytovatele
                 new PermissionSeed("provider.verifications", "read", "View KYC verifications across tenants"),
+                new PermissionSeed("provider.verifications", "review", "Approve or reject KYC verifications requiring manual review"),
+                new PermissionSeed("provider.client-identities", "read", "View KYC client identities across tenants"),
                 new PermissionSeed("provider.journey-templates", "read", "View KYC journey templates across tenants"),
                 new PermissionSeed("provider.journey-templates", "create", "Create KYC journey templates across tenants"),
                 new PermissionSeed("provider.journey-templates", "update", "Update KYC journey templates across tenants"),
@@ -150,7 +149,8 @@ public class BootstrapAuthorizationCatalogRunner implements ApplicationRunner {
                 new PermissionSeed("tenant.journey-templates", "update", "Update tenant KYC journey templates"),
                 new PermissionSeed("tenant.journey-templates", "delete", "Delete tenant KYC journey templates"),
                 new PermissionSeed("tenant.client-identities", "read", "View tenant KYC client identities"),
-                new PermissionSeed("tenant.verifications", "read", "View tenant KYC verifications")
+                new PermissionSeed("tenant.verifications", "read", "View tenant KYC verifications"),
+                new PermissionSeed("tenant.verifications", "review", "Approve or reject tenant KYC verifications requiring manual review")
         );
     }
 
@@ -161,7 +161,8 @@ public class BootstrapAuthorizationCatalogRunner implements ApplicationRunner {
                 new RoleSeed("SUPPORT", RoleScope.PROVIDER, "Provider support", 500),
                 new RoleSeed("OWNER", RoleScope.TENANT, "Tenant owner", 1000),
                 new RoleSeed("ADMIN", RoleScope.TENANT, "Tenant administrator", 900),
-                new RoleSeed("OPERATOR", RoleScope.TENANT, "Tenant operator", 500)
+                new RoleSeed("OPERATOR", RoleScope.TENANT, "Tenant operator", 500),
+                new RoleSeed("VIEWER", RoleScope.TENANT, "Tenant viewer", 100)
         );
     }
 
@@ -172,18 +173,20 @@ public class BootstrapAuthorizationCatalogRunner implements ApplicationRunner {
                         "provider.tenants:read", "provider.tenants:create", "provider.tenants:update", "provider.tenants:delete",
                         "provider.users:read", "provider.users:create", "provider.users:update", "provider.users:delete",
                         "provider.roles:read", "provider.roles:create", "provider.roles:update", "provider.roles:delete",
-                        "provider.permissions:read", "provider.permissions:create", "provider.permissions:update", "provider.permissions:delete",
+                        "provider.permissions:read",
                         "provider.audit-logs:read",
-                        "provider.verifications:read",
+                        "provider.verifications:read", "provider.verifications:review",
+                        "provider.client-identities:read",
                         "provider.journey-templates:read", "provider.journey-templates:create", "provider.journey-templates:update", "provider.journey-templates:delete"
                 )),
                 new RoleGrantSeed("ADMIN", RoleScope.PROVIDER, List.of(
                         "provider.tenants:read", "provider.tenants:create", "provider.tenants:update", "provider.tenants:delete",
                         "provider.users:read", "provider.users:create", "provider.users:update", "provider.users:delete",
                         "provider.roles:read", "provider.roles:create", "provider.roles:update", "provider.roles:delete",
-                        "provider.permissions:read", "provider.permissions:create", "provider.permissions:update", "provider.permissions:delete",
+                        "provider.permissions:read",
                         "provider.audit-logs:read",
-                        "provider.verifications:read",
+                        "provider.verifications:read", "provider.verifications:review",
+                        "provider.client-identities:read",
                         "provider.journey-templates:read", "provider.journey-templates:create", "provider.journey-templates:update", "provider.journey-templates:delete"
                 )),
                 new RoleGrantSeed("SUPPORT", RoleScope.PROVIDER, List.of(
@@ -203,7 +206,7 @@ public class BootstrapAuthorizationCatalogRunner implements ApplicationRunner {
                         "tenant.audit-logs:read",
                         "tenant.journey-templates:read", "tenant.journey-templates:create", "tenant.journey-templates:update", "tenant.journey-templates:delete",
                         "tenant.client-identities:read",
-                        "tenant.verifications:read"
+                        "tenant.verifications:read", "tenant.verifications:review"
                 )),
                 new RoleGrantSeed("ADMIN", RoleScope.TENANT, List.of(
                         "tenant.tenants:read", "tenant.tenants:update",
@@ -211,13 +214,15 @@ public class BootstrapAuthorizationCatalogRunner implements ApplicationRunner {
                         "tenant.roles:read",
                         "tenant.journey-templates:read", "tenant.journey-templates:create", "tenant.journey-templates:update", "tenant.journey-templates:delete",
                         "tenant.client-identities:read",
-                        "tenant.verifications:read"
+                        "tenant.verifications:read", "tenant.verifications:review"
                 )),
                 new RoleGrantSeed("OPERATOR", RoleScope.TENANT, List.of(
-                        "tenant.tenants:read",
-                        "tenant.members:read",
                         "tenant.journey-templates:read",
                         "tenant.client-identities:read",
+                        "tenant.verifications:read",  "tenant.verifications:review"
+                )),
+                new RoleGrantSeed("VIEWER", RoleScope.TENANT, List.of(
+                        "tenant.journey-templates:read",
                         "tenant.verifications:read"
                 ))
         );

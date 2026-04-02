@@ -15,12 +15,12 @@ public class TenantListDTO {
     @DisplayField(header = "Id", order = 1, hidden = true, sortable = false, filterable = false)
     private String id;
 
-    @DisplayField(header = "Name", order = 2, type = DisplayFieldType.REFERENCE, referenceKey = "id", referenceTemplate = "/p/tenants/{id}")
+    @DisplayField(header = "moduleDefinitions.tenants.columns.name", order = 2, type = DisplayFieldType.REFERENCE, referenceKey = "id", referenceTemplate = "/p/tenants/{id}")
     private String name;
 
-    @DisplayField(header = "Slug", order = 3)
+    @DisplayField(header = "moduleDefinitions.tenants.columns.slug", order = 3)
     private String slug;
 
-    @DisplayField(header = "Status", order = 4)
+    @DisplayField(header = "moduleDefinitions.tenants.columns.status", order = 4)
     private String status;
 }

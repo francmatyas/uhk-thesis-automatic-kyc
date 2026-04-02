@@ -16,6 +16,7 @@ import re
 import tempfile
 import warnings
 from contextlib import contextmanager
+from datetime import date
 from pathlib import Path
 from typing import Iterator, Optional
 
@@ -397,25 +398,107 @@ def correct_country_code(code: str) -> str:
     return code
 
 
+def _is_name_token(t: str) -> bool:
+    """
+    Vrátí True, pokud token vypadá jako skutečné jméno (ne OCR artefakt výplně).
+
+    Podmínky:
+      - alespoň 2 písmena, pouze alfa znaky
+      - více než 1 unikátní znak (zamezí 'SSSSSS')
+      - žádný znak netvoří >= 70 % délky tokenu (zamezí 'KKKKKKKS', 'KKKKKKKKKKKKKS')
+
+    Příklady tokenů filtrovaných jako šum:
+        "K"              → False  (délka < 2)
+        "SSSSSS"         → False  (1 unikátní znak)
+        "KKKKKKKKKKKKKS" → False  (K = 93 % délky)
+        "AAAB"           → False  (A = 75 % délky)
+    Příklady tokenů přijatých jako jméno:
+        "FRANC"          → True
+        "MATYAS"         → True
+        "ANNA"           → True   (A = 50 % < 70 %)
+        "ERIKSSON"       → True
+    """
+    if len(t) < 2 or not t.isalpha():
+        return False
+    if len(set(t)) <= 1:
+        return False
+    most_common = max(t.count(c) for c in set(t))
+    if most_common / len(t) >= 0.70:
+        return False
+    return True
+
+
 def clean_name(raw: str) -> str:
     """
     Odstraní OCR artefakty výplně z pole jména/příjmení.
 
-    MRZ výplňový znak '<' bývá po konci skutečného jména často chybně přečten
-    jako mezery nebo jednotlivá písmena (K, S, X, Z, I). Funkce ponechá
-    pouze tokeny s alespoň 2 písmeny a skončí na prvním krátkém/šumovém tokenu,
-    který následuje po validním jmenném tokenu.
+    MRZ výplňový znak '<' bývá po konci skutečného jména chybně přečten
+    jako mezery nebo skupiny písmen (K, S, X, Z, I). Ponechá pouze tokeny
+    vyhodnocené jako validní jméno a skončí na prvním šumovém tokenu
+    po validním obsahu.
 
     Příklady:
-        "MATYAS        K  KKKKKKKKKKSKKKS"   → "MATYAS"
-        "ANNA MARIA C"                       → "ANNA MARIA"
-        "ERIKSSON"                           → "ERIKSSON"
+        "MATYAS   K  KKKKKKKKKKSKKKS"   → "MATYAS"
+        "ANNA MARIA C"                  → "ANNA MARIA"
+        "ERIKSSON"                      → "ERIKSSON"
+        "KKKKKKKKKKKKK"                 → ""
+        "K KKKKKKKKKKKKKS"              → ""
     """
     tokens = raw.split()
     clean_tokens: list[str] = []
     for t in tokens:
-        if len(t) >= 2 and t.isalpha():
+        if _is_name_token(t):
             clean_tokens.append(t)
         elif clean_tokens:
             break  # první šumový token po reálném obsahu = konec jména
     return " ".join(clean_tokens)
+
+
+def recover_given_names(raw_surname: str) -> str:
+    """
+    Pokusí se obnovit jména z pole příjmení, pokud OCR chybně přečetl
+    oddělovač '<<' mezi příjmením a jmény (např. jako 'K<').
+
+    V takovém případě PassportEye vloží celý obsah do pole příjmení ve tvaru
+    'PRIJMENI <šum> JMENO' a pole jmen zůstane prázdné/výplňové.
+    Funkce projde tokeny, počká na první šumový token (= misread oddělovač)
+    a tokeny za ním považuje za daná jména.
+
+    Příklady:
+        "FRANC K MATYAS"          → "MATYAS"
+        "VAN DER BERG K ANNA"     → "ANNA"
+        "FRANC MATYAS"            → ""   (bez šumového oddělovače nelze bezpečně rozdělit)
+        "FRANC"                   → ""
+    """
+    tokens = raw_surname.split()
+    found_noise = False
+    recovered: list[str] = []
+    for t in tokens:
+        if found_noise:
+            if _is_name_token(t):
+                recovered.append(t)
+            else:
+                break
+        else:
+            if not _is_name_token(t):
+                found_noise = True
+    return " ".join(recovered)
+
+
+def yymmdd_to_iso(yymmdd: str, future: bool = False) -> Optional[str]:
+    """
+    Převede MRZ datum ve formátu YYMMDD na ISO 8601 (YYYY-MM-DD).
+
+    Určení století:
+      future=False (datum narození): YY <= aktuální rok (mod 100) → 2000s, jinak 1900s
+      future=True  (datum platnosti): vždy 2000s, doklady nevypršely před r. 2000
+    """
+    if not yymmdd or len(yymmdd) != 6 or not yymmdd.isdigit():
+        return None
+
+    yy, mm, dd = int(yymmdd[:2]), int(yymmdd[2:4]), int(yymmdd[4:6])
+    if future:
+        year = 2000 + yy
+    else:
+        year = 2000 + yy if yy <= date.today().year % 100 else 1900 + yy
+    return f"{year:04d}-{mm:02d}-{dd:02d}"

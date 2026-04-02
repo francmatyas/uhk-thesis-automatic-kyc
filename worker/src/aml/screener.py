@@ -182,7 +182,7 @@ class AmlScreener:
         try:
             rows = self._con.execute(_SELECT, (match,)).fetchall()  # type: ignore[union-attr]
         except sqlite3.OperationalError as exc:
-            logger.error("FTS5 query failed (expr=%r): %s", match, exc)
+            logger.error("FTS5 query failed: %s", exc)
             return []
 
         if not rows:

@@ -2,16 +2,14 @@ package com.francmatyas.uhk_thesis_automatic_kyc_api.modules.worker_job.model;
 
 import com.francmatyas.uhk_thesis_automatic_kyc_api.model.BaseEntity;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.vladmihalcea.hibernate.type.json.JsonType;
+import com.francmatyas.uhk_thesis_automatic_kyc_api.security.crypto.EncryptedJsonNodeConverter;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.annotations.Type;
 
 import java.time.Instant;
-import java.util.Map;
 
 @Entity
 @Table(
@@ -44,8 +42,8 @@ public class WorkerJob extends BaseEntity {
     @Column(nullable = false, length = 16)
     private WorkerJobStatus status = WorkerJobStatus.QUEUED;
 
-    @Type(JsonType.class)
-    @Column(columnDefinition = "jsonb", nullable = false)
+    @Convert(converter = EncryptedJsonNodeConverter.class)
+    @Column(columnDefinition = "text", nullable = false)
     private JsonNode payload;
 
     /**
@@ -58,17 +56,17 @@ public class WorkerJob extends BaseEntity {
     private String progressMsg;
 
     /**
-     * JSONB výsledek při úspěchu
+     * Výsledek při úspěchu. Šifrované při uložení.
      */
-    @Type(JsonType.class)
-    @Column(columnDefinition = "jsonb")
+    @Convert(converter = EncryptedJsonNodeConverter.class)
+    @Column(columnDefinition = "text")
     private JsonNode result;
 
     /**
-     * JSONB chyba {code,message,details} při selhání/zrušení
+     * Chyba {code,message,details} při selhání/zrušení. Šifrované při uložení.
      */
-    @Type(JsonType.class)
-    @Column(columnDefinition = "jsonb")
+    @Convert(converter = EncryptedJsonNodeConverter.class)
+    @Column(columnDefinition = "text")
     private JsonNode error;
 
     @Column(nullable = false)

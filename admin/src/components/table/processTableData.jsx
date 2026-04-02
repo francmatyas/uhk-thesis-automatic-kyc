@@ -1,7 +1,35 @@
+import { useState } from "react";
 import { Link } from "react-router";
+import { Check, Copy } from "lucide-react";
 import { Image } from "@/components/ui/image";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+
+function CopyableCell({ value, children, className = "" }) {
+  const [copied, setCopied] = useState(false);
+
+  function handleCopy(e) {
+    e.stopPropagation();
+    navigator.clipboard.writeText(String(value ?? "")).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }
+
+  return (
+    <span
+      onClick={handleCopy}
+      title={copied ? "Zkopírováno!" : "Kliknutím zkopírovat"}
+      className={`inline-flex items-center gap-1.5 cursor-pointer select-none rounded px-1.5 py-0.5 bg-muted transition-colors hover:bg-muted/70 ${className}`}
+    >
+      {children ?? value}
+      {copied
+        ? <Check className="size-3 text-green-500 shrink-0" />
+        : <Copy className="size-3 text-muted-foreground shrink-0" />
+      }
+    </span>
+  );
+}
 
 function isEmptyDateValue(value) {
   return value === null || value === undefined || value === "";
@@ -47,18 +75,70 @@ export default function processTableData({
   enableRowSelection,
   context = {},
 }) {
+  const tr =
+    typeof context.translate === "function"
+      ? context.translate
+      : (value) => value;
+  const hasTranslation =
+    typeof context.hasTranslation === "function"
+      ? context.hasTranslation
+      : () => false;
+  const resolveScopedLegacyLabel = (legacyKey, bucket = "columns") => {
+    if (typeof legacyKey !== "string") return null;
+    if (!legacyKey.startsWith("moduleDefinitions.labels.")) return null;
+
+    const moduleKey =
+      typeof context.module === "string" && context.module.length > 0
+        ? context.module
+        : null;
+    if (!moduleKey) return null;
+
+    const token = legacyKey.slice("moduleDefinitions.labels.".length);
+    if (!token) return null;
+
+    const scopedKey = `moduleDefinitions.${moduleKey}.${bucket}.${token}`;
+    if (!hasTranslation(scopedKey)) return null;
+    return tr(scopedKey);
+  };
+  const resolveHeaderLabel = (headerKey) => {
+    if (typeof headerKey !== "string") return headerKey;
+    if (headerKey.includes(".")) {
+      const scopedLegacy = resolveScopedLegacyLabel(headerKey, "columns");
+      return scopedLegacy ?? tr(headerKey);
+    }
+
+    const moduleKey =
+      typeof context.module === "string" && context.module.length > 0
+        ? context.module
+        : null;
+
+    if (moduleKey) {
+      const moduleScopedKey = `moduleDefinitions.${moduleKey}.columns.${headerKey}`;
+      if (hasTranslation(moduleScopedKey)) return tr(moduleScopedKey);
+    }
+
+    const legacyKey = `moduleDefinitions.labels.${headerKey}`;
+    if (hasTranslation(legacyKey)) return tr(legacyKey);
+
+    return tr(headerKey);
+  };
+
   const filteredColumns = columns.map((column) => {
     const columnConfig =
       context.enumConfig?.[column.accessorKey] ||
       context.enumConfig?.[column.id] ||
       {};
     const effectiveColumn = { ...column, ...columnConfig };
-    const originalHeader = effectiveColumn.header;
+    const originalHeader = resolveHeaderLabel(effectiveColumn.header);
+    const effectiveColumnWithHeader = {
+      ...effectiveColumn,
+      header: originalHeader,
+    };
 
     switch (effectiveColumn.type) {
       case "CURRENCY":
         return {
-          ...effectiveColumn,
+          ...effectiveColumnWithHeader,
           header: <div className="w-full text-right">{originalHeader}</div>,
           cell: ({ row }) => {
             const amount = parseFloat(row.getValue(effectiveColumn.accessorKey));
@@ -72,7 +152,7 @@ export default function processTableData({
 
       case "NUMBER":
         return {
-          ...effectiveColumn,
+          ...effectiveColumnWithHeader,
           header: <div className="w-full text-right">{originalHeader}</div>,
           cell: ({ row }) => {
             const value = row.getValue(effectiveColumn.accessorKey);
@@ -82,7 +162,7 @@ export default function processTableData({
 
       case "REFERENCE":
         return {
-          ...effectiveColumn,
+          ...effectiveColumnWithHeader,
           cell: ({ row }) => {
             const value = row.getValue(effectiveColumn.accessorKey);
             const uri = (effectiveColumn.referenceTemplate || "").replace(
@@ -119,7 +199,7 @@ export default function processTableData({
 
       case "DATE":
         return {
-          ...effectiveColumn,
+          ...effectiveColumnWithHeader,
           cell: ({ row }) => {
             const rawValue = row.getValue(effectiveColumn.accessorKey);
             const date = parseSafeDate(rawValue);
@@ -136,7 +216,7 @@ export default function processTableData({
       case "DATETIME":
       case "DATE_TIME":
         return {
-          ...effectiveColumn,
+          ...effectiveColumnWithHeader,
           cell: ({ row }) => {
             const rawValue = row.getValue(effectiveColumn.accessorKey);
             const date = parseSafeDate(rawValue);
@@ -154,11 +234,19 @@ export default function processTableData({
 
       case "ENUM":
         return {
-          ...effectiveColumn,
+          ...effectiveColumnWithHeader,
           cell: ({ row }) => {
             const value = row.getValue(effectiveColumn.accessorKey);
             const enumOption = resolveEnumOption(effectiveColumn, value);
-            const label = resolveEnumLabel(effectiveColumn, value, enumOption);
+            const rawLabel = resolveEnumLabel(
+              effectiveColumn,
+              value,
+              enumOption,
+            );
+            const label =
+              typeof rawLabel === "string"
+                ? resolveScopedLegacyLabel(rawLabel, "columns") ?? tr(rawLabel)
+                : rawLabel;
             const displayMode = (
               effectiveColumn.displayMode ||
               effectiveColumn.enumDisplayMode ||
@@ -185,7 +273,7 @@ export default function processTableData({
 
       case "IMAGE":
         return {
-          ...effectiveColumn,
+          ...effectiveColumnWithHeader,
           cell: ({ row }) => {
             return (
               <div className="w-24 h-24 flex justify-center items-center">
@@ -199,8 +287,32 @@ export default function processTableData({
           },
         };
 
+      case "MONO":
+        return {
+          ...effectiveColumnWithHeader,
+          cell: ({ row }) => {
+            const value = row.getValue(effectiveColumn.accessorKey);
+            const content = (
+              <span className="font-mono text-xs tracking-wide">{value}</span>
+            );
+            if (effectiveColumn.copyable) {
+              return <CopyableCell value={value}>{content}</CopyableCell>;
+            }
+            return content;
+          },
+        };
+
       default:
-        return effectiveColumn;
+        if (effectiveColumn.copyable) {
+          return {
+            ...effectiveColumnWithHeader,
+            cell: ({ row }) => {
+              const value = row.getValue(effectiveColumn.accessorKey);
+              return <CopyableCell value={value} />;
+            },
+          };
+        }
+        return effectiveColumnWithHeader;
     }
   });
 

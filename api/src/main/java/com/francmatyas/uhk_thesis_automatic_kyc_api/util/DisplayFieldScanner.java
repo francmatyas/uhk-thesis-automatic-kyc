@@ -25,6 +25,7 @@ public class DisplayFieldScanner {
                             ann.referenceKey(),
                             ann.referenceTemplate(),
                             ann.width(),
+                            ann.copyable(),
                             f
                     );
                 })

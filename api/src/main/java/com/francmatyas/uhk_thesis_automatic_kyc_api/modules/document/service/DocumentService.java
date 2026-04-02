@@ -90,6 +90,58 @@ public class DocumentService {
         return toDto(saved);
     }
 
+    @Transactional
+    public PresignDocumentUploadResponse presignFlowUpload(UUID verificationId, UUID tenantId,
+                                                           String filename, String contentType, String category) {
+        String normalizedCategory = normalizeCategory(category);
+        String originalFilename = sanitizeFilename(filename);
+        String key = buildStorageKey("VERIFICATION", verificationId, normalizedCategory, originalFilename);
+        Instant expiresAt = Instant.now().plus(DEFAULT_UPLOAD_TTL);
+
+        StoredDocument doc = new StoredDocument();
+        doc.setOwnerType("VERIFICATION");
+        doc.setOwnerId(verificationId);
+        doc.setTenantId(tenantId);
+        doc.setCategory(normalizedCategory);
+        doc.setKind(DocumentKind.UPLOADED);
+        doc.setStatus(DocumentStatus.PENDING_UPLOAD);
+        doc.setStorageKey(key);
+        doc.setOriginalFilename(originalFilename);
+        doc.setContentType(contentType.trim().toLowerCase(Locale.ROOT));
+        doc.setUploadExpiresAt(expiresAt);
+        StoredDocument saved = documentRepository.save(doc);
+
+        String uploadUrl = storageService.createUploadUrl(key, doc.getContentType(), DEFAULT_UPLOAD_TTL);
+        return PresignDocumentUploadResponse.builder()
+                .documentId(saved.getId())
+                .uploadUrl(uploadUrl)
+                .storageKey(key)
+                .publicUrl(storageService.publicUrlForKey(key))
+                .uploadExpiresAt(expiresAt)
+                .build();
+    }
+
+    @Transactional
+    public DocumentDTO completeFlowUpload(UUID documentId, UUID verificationId, CompleteDocumentUploadRequest request) {
+        StoredDocument doc = documentRepository.findById(documentId)
+                .orElseThrow(() -> new IllegalArgumentException("document_not_found"));
+
+        if (!"VERIFICATION".equals(doc.getOwnerType()) || !verificationId.equals(doc.getOwnerId())) {
+            throw new SecurityException("forbidden");
+        }
+        if (doc.getStatus() == DocumentStatus.DELETED) {
+            throw new IllegalArgumentException("document_deleted");
+        }
+
+        doc.setStatus(DocumentStatus.READY);
+        doc.setSizeBytes(request != null ? request.getSizeBytes() : null);
+        doc.setChecksum(request != null ? trimToNull(request.getChecksum()) : null);
+        doc.setUploadExpiresAt(null);
+        StoredDocument saved = documentRepository.save(doc);
+        enqueueDocumentWebhook(saved, "document.ready");
+        return toDto(saved);
+    }
+
     @Transactional(readOnly = true)
     public List<DocumentDTO> listDocuments(String ownerType, UUID ownerId, String category, User currentUser) {
         String normalizedOwnerType = normalizeOwnerType(ownerType);

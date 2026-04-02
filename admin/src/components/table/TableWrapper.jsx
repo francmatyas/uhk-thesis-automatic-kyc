@@ -152,6 +152,7 @@ export default function TableWrapper({
       )} */}
       <div className="h-full">
         <DataTable
+          module={module}
           data={data}
           loading={isLoading}
           error={error}

@@ -15,19 +15,23 @@ import java.time.Instant;
 @AllArgsConstructor
 public class JourneyTemplateListDTO {
 
-    @DisplayField(header = "Id", order = 1, hidden = true, sortable = false, filterable = false)
+    @DisplayField(header = "Id", order = 2, type = DisplayFieldType.MONO, copyable = true)
     private String id;
 
-    @DisplayField(header = "Name", order = 2, type = DisplayFieldType.REFERENCE,
+    @DisplayField(header = "moduleDefinitions.journeyTemplates.columns.name", order = 1, type = DisplayFieldType.REFERENCE,
             referenceKey = "id", referenceTemplate = "/p/journey-templates/{id}")
     private String name;
 
-    @DisplayField(header = "Status", order = 3, type = DisplayFieldType.ENUM, sortable = true)
+    @DisplayField(header = "moduleDefinitions.journeyTemplates.columns.status", order = 3, type = DisplayFieldType.ENUM, sortable = true)
     private String status;
 
-    @DisplayField(header = "Tenant", order = 4, sortable = false, filterable = false)
+    @DisplayField(header = "Tenant Id", order = 4, hidden = true, sortable = false, filterable = false)
     private String tenantId;
 
-    @DisplayField(header = "Created", order = 5, type = DisplayFieldType.DATETIME, sortable = true, filterable = false)
+    @DisplayField(header = "moduleDefinitions.journeyTemplates.columns.tenant", order = 5, type = DisplayFieldType.REFERENCE,
+            referenceKey = "tenantId", referenceTemplate = "/p/tenants/{tenantId}")
+    private String tenantName;
+
+    @DisplayField(header = "moduleDefinitions.journeyTemplates.columns.createdAt", order = 6, type = DisplayFieldType.DATETIME, sortable = true, filterable = false)
     private Instant createdAt;
 }

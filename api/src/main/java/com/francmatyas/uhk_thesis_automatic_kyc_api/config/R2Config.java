@@ -25,6 +25,9 @@ public class R2Config {
     @Value("${storage.s3.endpoint}")
     private String endpoint;
 
+    @Value("${storage.s3.worker-presign-endpoint:${storage.s3.endpoint}}")
+    private String workerPresignEndpoint;
+
     @Value("${storage.s3.region:us-east-1}")
     private String region;
 
@@ -61,5 +64,18 @@ public class R2Config {
                 )
                 .build();
     }
-}
 
+    @Bean
+    public S3Presigner r2S3WorkerPresigner(AwsBasicCredentials creds) {
+        return S3Presigner.builder()
+                .credentialsProvider(StaticCredentialsProvider.create(creds))
+                .region(Region.of(region))
+                .endpointOverride(URI.create(workerPresignEndpoint))
+                .serviceConfiguration(
+                        S3Configuration.builder()
+                                .pathStyleAccessEnabled(true)
+                                .build()
+                )
+                .build();
+    }
+}

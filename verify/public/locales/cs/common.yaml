@@ -1,0 +1,293 @@
+app:
+  name: KYC Verify
+
+home:
+  title: Ověření identity
+  description: Otevřete svůj unikátní ověřovací odkaz nebo zadejte token a pokračujte v bezpečném KYC procesu.
+  tokenLabel: Ověřovací token
+  tokenPlaceholder: Zadejte svůj ověřovací token
+  startFlow: Spustit ověření
+
+flow:
+  title: Ověřovací proces
+  progress: Postup
+  stepsTitle: Kroky ověření
+  currentStepTitle: Aktuální krok
+  completeStep: Dokončit
+  completedTitle: Ověření dokončeno
+  completedDescription: Všechny povinné kroky jsou dokončeny. Ověření bude pokračovat automatickou kontrolou.
+  securityInfo: Vaše data jsou šifrována a zpracována podle pravidel souladu tenanta.
+  expiresAt: Platnost do
+  loading: Načítám ověřovací proces...
+  loadError: Něco se pokazilo
+  loadErrorDescription: Ověření se nepodařilo načíst. Zkontrolujte odkaz a zkuste to znovu.
+  retry: Zkusit znovu
+  alreadySubmitted: Ověření již bylo odesláno
+  alreadySubmittedDescription: Toto ověření již bylo dokončeno a odesláno ke kontrole. Další akce není potřeba.
+  expired: Platnost ověřovacího odkazu vypršela
+  expiredDescription: Tento ověřovací odkaz již není platný. Požádejte prosím o nový ověřovací odkaz.
+  sending: Odesílám...
+  verifying: Ověřuji...
+  uploading: Nahrávám...
+  fallbackDescription: Dokončete tento krok pro pokračování v ověřovacím procesu.
+  continueOnPhone: Pokračovat na telefonu
+  qrDescription: Naskenujte tento QR kód telefonem a pokračujte v ověření na mobilním zařízení.
+  share: Sdílet odkaz
+  copyLink: Kopírovat odkaz
+  linkCopied: Zkopírováno!
+
+status:
+  INITIATED: Inicializováno
+  IN_PROGRESS: Probíhá
+  READY_FOR_AUTOCHECK: Připraveno pro automatickou kontrolu
+  AUTO_PASSED: Automatická kontrola úspěšná
+  AUTO_FAILED: Automatická kontrola neúspěšná
+  REQUIRES_REVIEW: Vyžaduje kontrolu
+  APPROVED: Schváleno
+  REJECTED: Zamítnuto
+  EXPIRED: Expirováno
+
+stepStatus:
+  PENDING: Čeká
+  IN_PROGRESS: Probíhá
+  COMPLETED: Dokončeno
+  FAILED: Selhalo
+  SKIPPED: Přeskočeno
+
+stepType:
+  EMAIL_VERIFICATION: Ověření e-mailu
+  PHONE_VERIFICATION: Ověření telefonu
+  DOCUMENT_IDENTITY: Občanský průkaz nebo pas
+  LIVENESS_CHECK: Kontrola živosti
+  CUSTOM: Další ověření
+  AML_QUESTIONNAIRE: Finanční dotazník
+  PERSONAL_INFO: Osobní údaje
+
+step:
+  email:
+    shortDescription: Pošleme jednorázový kód na váš e-mail.
+    emailLabel: E-mailová adresa
+    emailPlaceholder: vas@email.cz
+    sendCode: Odeslat kód na e-mail
+    codeLabel: Ověřovací kód
+    codePlaceholder: Zadejte kód z e-mailu
+    verifyCode: Ověřit e-mailový kód
+    codeSentTo: "Kód odeslán na"
+    resendCode: Znovu odeslat kód
+    sendError: Kód na e-mail se nepodařilo odeslat.
+    verifyError: Ověření e-mailového kódu selhalo.
+    invalidCode: Neplatný e-mailový kód. Zkuste to prosím znovu.
+  phone:
+    shortDescription: Pošleme jednorázový SMS kód na vaše telefonní číslo.
+    phoneLabel: Telefonní číslo
+    phonePlaceholder: 612 345 678
+    sendCode: Odeslat SMS kód
+    codeLabel: SMS kód
+    codePlaceholder: Zadejte SMS kód
+    verifyCode: Ověřit SMS kód
+    codeSentTo: "SMS odeslána na"
+    resendCode: Znovu odeslat SMS
+    sendError: SMS kód se nepodařilo odeslat.
+    verifyError: Ověření SMS kódu selhalo.
+    invalidCode: Neplatný SMS kód. Zkuste to prosím znovu.
+  document:
+    shortDescription: Vyberte typ dokladu a naskenujte ho kamerou nebo nahrajte soubor.
+    selectTitle: Vyberte typ dokladu
+    selectDescription: Pro pokračování zvolte typ dokladu.
+    captureTitle: Naskenovat {{side}}
+    captureDescription: Nahrajte obrázek dokladu pro každou požadovanou stranu.
+    continue: Pokračovat
+    backToType: Změnit typ
+    nextSide: Další strana
+    cameraUnavailable: Kamera není dostupná. Použijte nahrání souboru.
+    typeLabel: Typ dokladu
+    idCard: Občanský průkaz
+    idCardHint: 2 strany (přední + zadní)
+    passport: Pas
+    passportHint: Pouze přední strana
+    notSelected: Nevybráno
+    side:
+      front: Přední strana
+      back: Zadní strana
+    sideProgress: "Strana {{current}} z {{total}}"
+    scan: Skenovat
+    pickUpload: Nahrát
+    tapToUpload: Klepnutím nahrajte z galerie
+    changePhoto: Změnit fotografii
+    useCamera: Použít kameru
+    capturePhoto: Vyfotit
+    cameraDescription: Umístěte doklad do rámečku a vyfotografujte ho.
+    backToUpload: Nahrát soubor
+    continueToBack: Pokračovat na zadní stranu
+    backToFront: Zpět na přední stranu
+    fileLabel: Vyfotit nebo nahrát obrázek dokladu
+    fileHint: Vyberte obrázek ze svého zařízení.
+    upload: Odeslat dokument
+    uploadError: Nahrání dokumentu selhalo.
+  liveness:
+    introDescription: "Umístěte obličej do kamery a postupujte podle instrukcí. Pořídíte 4 fotografie — přímo, doleva, doprava a nahoru."
+    captureTitle: Kontrola polohy obličeje
+    holdStill: Zůstaňte nehybně a stiskněte Snímek
+    startCheck: Spustit kontrolu
+    capture: Snímek
+    captureManual: Vyfotit ručně
+    reviewTitle: Zkontrolujte fotografie
+    reviewDescription: Ujistěte se, že každá fotografie je ostrá a dobře osvětlená. Kliknutím na ikonu obnovení pořiďte snímek znovu.
+    submit: Odeslat fotografie
+    retakeAll: Vyfotit vše znovu
+    cameraError: Přístup ke kameře byl odepřen. Povolte přístup ke kameře a zkuste to znovu.
+    uploadError: Nahrání kontroly živosti selhalo.
+    detectionStatus:
+      loading: Načítám detekci obličeje…
+      error: Automatická detekce není dostupná — použijte tlačítko níže
+      no-face: Umístěte obličej do kruhu
+      wrong-pose: Pokračujte v otáčení
+      correct-pose: Zůstaňte nehybně…
+      captured: "Zachyceno!"
+    direction:
+      front: Dívejte se přímo do kamery
+      left: Otočte hlavu doleva
+      right: Otočte hlavu doprava
+      up: Mírně zakloňte hlavu
+    positionLabel:
+      front: Přímo
+      left: Vlevo
+      right: Vpravo
+      up: Nahoru
+  personalInfo:
+    shortDescription: Zadejte své celé jméno a datum narození.
+    firstNameLabel: Jméno
+    firstNamePlaceholder: Jan
+    lastNameLabel: Příjmení
+    lastNamePlaceholder: Novák
+    dobLabel: Datum narození
+    submit: Pokračovat
+    submitError: Osobní údaje se nepodařilo odeslat.
+  aml:
+    title: Finanční zázemí
+    description: Pomozte nám pochopit vaši finanční situaci a plánované využití účtu.
+    submit: Odeslat dotazník
+    uploadError: Odeslání dotazníku selhalo. Zkuste to prosím znovu.
+    section:
+      employment: Zaměstnání a příjmy
+      funds: Zdroj prostředků
+      account: Využití účtu
+      tax: Daňové rezidentství
+      compliance: Prohlášení o souladu
+    field:
+      employment_status:
+        label: Pracovní status
+        placeholder: Vyberte status
+      employer_name:
+        label: Název zaměstnavatele
+        placeholder: Váš zaměstnavatel nebo společnost
+      job_title:
+        label: Pracovní pozice
+        placeholder: Vaše aktuální pozice
+      source_of_income:
+        label: Primární zdroj příjmu
+        placeholder: Vyberte zdroj
+      monthly_income_range:
+        label: Měsíční příjem (CZK)
+        placeholder: Vyberte rozsah
+      industry:
+        label: Odvětví
+        placeholder: Vyberte odvětví
+      source_of_funds:
+        label: Zdroj prostředků pro tento účet
+        placeholder: Vyberte zdroj
+      source_of_wealth:
+        label: Zdroj majetku
+        placeholder: Stručně popište, jak jste získali svůj majetek...
+      purpose_of_account:
+        label: Účel účtu
+        placeholder: Vyberte účel
+      expected_monthly_volume:
+        label: Očekávaný měsíční objem transakcí (CZK)
+        placeholder: Vyberte objem
+      expected_transaction_count:
+        label: Očekávaný počet měsíčních transakcí
+        placeholder: Vyberte rozsah
+      foreign_transactions_expected:
+        label: Očekáváte zahraniční platby nebo převody?
+      is_czech_tax_resident:
+        label: Jste daňový rezident České republiky?
+      tax_residency_country:
+        label: Země daňové rezidence
+        placeholder: Vyberte zemi
+      tin:
+        label: "Daňové identifikační číslo (TIN / DIČ)"
+        placeholder: Zadejte vaše TIN / DIČ
+      pep_self:
+        label: Jste politicky exponovaná osoba (PEP)?
+        hint: "Osoba zastávající nebo nedávno zastávající prominentní veřejnou funkci (politik, soudce, vysoký státní úředník apod.)"
+      close_pep:
+        label: Jste blízká osoba nebo rodinný příslušník PEP?
+        hint: "Manžel/ka, dítě, rodič nebo obchodní partner PEP"
+      pep_explanation:
+        label: Popis PEP vztahu
+        placeholder: Prosím popište svou roli nebo vztah k PEP...
+      acting_on_own_behalf:
+        label: Jednáte na vlastní účet?
+        hint: "Vyberte Ne, pokud jednáte jako zmocněnec nebo ve prospěch jiné osoby"
+      crypto:
+        label: Provádíte transakce s kryptoměnami?
+    options:
+      employment_status:
+        employed: "Zaměstnaný (plný nebo částečný úvazek)"
+        self_employed: "OSVČ / freelancer"
+        unemployed: Nezaměstnaný
+        retired: V důchodu
+        student: Student
+        other: Jiné
+      source_of_income:
+        employment: "Pracovní poměr / plat"
+        self_employment: "OSVČ / samostatná činnost"
+        pension: "Důchod / penze"
+        student_support: "Stipendium / podpora pro studenty"
+        social_benefits: "Sociální dávky"
+        investments: "Investice / dividendy"
+        rental_income: Příjem z pronájmu
+        other: Jiné
+      monthly_income_range:
+        under_20000: "Do 20 000 Kč"
+        range_20000_50000: "20 000 – 50 000 Kč"
+        range_50000_100000: "50 000 – 100 000 Kč"
+        range_100000_250000: "100 000 – 250 000 Kč"
+        over_250000: "Nad 250 000 Kč"
+      source_of_funds:
+        salary: "Plat / mzda"
+        business_income: Příjmy z podnikání
+        savings: Osobní úspory
+        inheritance: Dědictví
+        gift: Dar
+        sale_of_assets: Prodej majetku nebo nemovitosti
+        investment_proceeds: Výnosy z investic
+        other: Jiné
+      expected_monthly_volume:
+        under_5000: "Do 5 000 Kč"
+        range_5000_25000: "5 000 – 25 000 Kč"
+        range_25000_100000: "25 000 – 100 000 Kč"
+        range_100000_500000: "100 000 – 500 000 Kč"
+        over_500000: "Nad 500 000 Kč"
+      expected_transaction_count:
+        below_5: "Méně než 5"
+        range_5_20: "5 – 20"
+        range_20_50: "20 – 50"
+        above_50: "Více než 50"
+      industry:
+        finance: Finance a bankovnictví
+        healthcare: Zdravotnictví
+        technology: Technologie a IT
+        retail: Obchod a maloobchod
+        construction: Stavebnictví a nemovitosti
+        education: Vzdělávání
+        government: Státní správa
+        media: Média a zábava
+        manufacturing: Výrobní průmysl
+        other: Jiné
+    yes: "Ano"
+    no: "Ne"
+    optional: volitelné
+    error:
+      required: Toto pole je povinné

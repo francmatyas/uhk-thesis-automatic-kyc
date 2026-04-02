@@ -12,9 +12,7 @@ public record RiskScoreResponse(
         UUID verificationId,
         int overallScore,
         RiskLevel level,
-        JsonNode breakdownJson,
-        Instant createdAt,
-        Instant updatedAt
+        JsonNode breakdownJson
 ) {
     public static RiskScoreResponse from(RiskScore r) {
         return new RiskScoreResponse(
@@ -22,9 +20,7 @@ public record RiskScoreResponse(
                 r.getVerification() != null ? r.getVerification().getId() : null,
                 r.getOverallScore(),
                 r.getLevel(),
-                r.getBreakdownJson(),
-                r.getCreatedAt(),
-                r.getUpdatedAt()
+                r.getBreakdownJson()
         );
     }
 }

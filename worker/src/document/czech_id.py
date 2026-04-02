@@ -23,7 +23,12 @@ from typing import Optional
 
 from passporteye.mrz.text import MRZ
 
-from .mrz_reader import read_mrz_enhanced, clean_name, correct_country_code
+from .mrz_reader import (
+    read_mrz_enhanced,
+    clean_name,
+    correct_country_code,
+    yymmdd_to_iso,
+)
 from .czech_id_face import read_czech_id_face, CzechIDFaceFields, BarcodeResult
 from ..errors import WorkerError
 
@@ -33,9 +38,9 @@ class CzechIDResult:
     # Základní identifikační údaje (z MRZ)
     surname: str
     given_names: str
-    date_of_birth: str          # YYMMDD
+    date_of_birth: str          # ISO 8601 YYYY-MM-DD
     sex: str                    # M / F
-    expiration_date: str        # YYMMDD
+    expiration_date: str        # ISO 8601 YYYY-MM-DD
     document_number: str
 
     # Specifické pro ČR
@@ -54,6 +59,9 @@ class CzechIDResult:
 
     # Původní dict z PassportEye pro pole, která nejsou vystavena výše
     raw: dict = field(default_factory=dict)
+
+    # Surový OCR text ze zadní strany karty (pro diagnostiku, proč se adresa nezachytí)
+    back_raw_ocr: Optional[str] = None
 
 
 def read_czech_id(
@@ -153,9 +161,9 @@ def parse_czech_id(mrz: MRZ, face: Optional[CzechIDFaceFields] = None) -> CzechI
     return CzechIDResult(
         surname=surname,
         given_names=given_names,
-        date_of_birth=dob,
+        date_of_birth=yymmdd_to_iso(dob, future=False),
         sex=sex,
-        expiration_date=expiry,
+        expiration_date=yymmdd_to_iso(expiry, future=True),
         document_number=doc_number,
         national_number=national_number,
         place_of_birth=face.place_of_birth if face else None,
@@ -164,6 +172,7 @@ def parse_czech_id(mrz: MRZ, face: Optional[CzechIDFaceFields] = None) -> CzechI
         confidence_notes=notes,
         barcodes=face.barcodes if face else [],
         raw=d,
+        back_raw_ocr=face.raw_ocr if face else None,
     )
 
 

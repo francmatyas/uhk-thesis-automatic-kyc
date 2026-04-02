@@ -8,6 +8,7 @@ import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.user.dto.UserPrefere
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.user.service.UserPreferencesService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -19,18 +20,20 @@ public class UserPreferencesController {
     private final UserPreferencesService userPreferencesService;
 
     @GetMapping
-    public ResponseEntity<GetUserPreferencesDTO> getCurrentUserPreferences(
+    public ResponseEntity<?> getCurrentUserPreferences(
             @AuthenticationPrincipal User currentUser
     ) {
+        if (currentUser == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         GetUserPreferencesDTO preferences = userPreferencesService.getUserPreferences(currentUser.getId());
         return ResponseEntity.ok(preferences);
     }
 
     @PutMapping
-    public ResponseEntity<UserPreferencesDTO> updateCurrentUserPreferences(
+    public ResponseEntity<?> updateCurrentUserPreferences(
             @AuthenticationPrincipal User currentUser,
             @Valid @RequestBody UpdateUserPreferencesRequest request
     ) {
+        if (currentUser == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         UserPreferencesDTO preferences = userPreferencesService.updateUserPreferences(
                 currentUser.getId(),
                 request

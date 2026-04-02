@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router";
+import { useTranslation } from "react-i18next";
 import { PlusCircle } from "lucide-react";
 import { toast } from "sonner";
 import { createWebhook, fetchWebhookOptions } from "@/api/tenant/webhooks";
@@ -20,6 +21,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function WebhookCreateWizardDialog() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState("");
   const [secret, setSecret] = useState("");
@@ -43,10 +45,10 @@ export default function WebhookCreateWizardDialog() {
     onSuccess: async (result) => {
       setCreatedId(result?.id || null);
       await queryClient.invalidateQueries({ queryKey: queryKeys.webhooks.list() });
-      toast.success("Webhook created successfully.");
+      toast.success(t("moduleDefinitions.webhooks.messages.success.create"));
     },
     onError: () => {
-      toast.error("Failed to create webhook. Please try again.");
+      toast.error(t("moduleDefinitions.webhooks.createWizard.toasts.errorCreate"));
     },
   });
 
@@ -70,19 +72,25 @@ export default function WebhookCreateWizardDialog() {
     const trimmedSecret = secret.trim();
 
     if (!trimmedUrl) {
-      toast.error("Webhook URL is required.");
+      toast.error(t("moduleDefinitions.webhooks.createWizard.validation.urlRequired"));
       return;
     }
     if (!trimmedSecret) {
-      toast.error("Webhook secret is required.");
+      toast.error(
+        t("moduleDefinitions.webhooks.createWizard.validation.secretRequired"),
+      );
       return;
     }
     if (trimmedSecret.length < 16 || trimmedSecret.length > 255) {
-      toast.error("Webhook secret must be between 16 and 255 characters.");
+      toast.error(
+        t("moduleDefinitions.webhooks.createWizard.validation.secretLength"),
+      );
       return;
     }
     if (eventTypes.length === 0) {
-      toast.error("Select at least one event type.");
+      toast.error(
+        t("moduleDefinitions.webhooks.createWizard.validation.eventTypeRequired"),
+      );
       return;
     }
 
@@ -113,7 +121,7 @@ export default function WebhookCreateWizardDialog() {
     <>
       <Button size="default" onClick={() => setOpen(true)}>
         <PlusCircle />
-        New Webhook
+        {t("moduleDefinitions.webhooks.createWizard.trigger")}
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -121,40 +129,50 @@ export default function WebhookCreateWizardDialog() {
           {!createdId && (
             <>
               <DialogHeader>
-                <DialogTitle>Create Webhook</DialogTitle>
+                <DialogTitle>
+                  {t("moduleDefinitions.webhooks.createWizard.dialog.title")}
+                </DialogTitle>
                 <DialogDescription>
-                  Enter the target URL and signing secret.
+                  {t("moduleDefinitions.webhooks.createWizard.dialog.description")}
                 </DialogDescription>
               </DialogHeader>
 
               <div className="flex flex-col gap-3 py-2">
                 <Input
-                  label="URL"
+                  label={t("moduleDefinitions.webhooks.createWizard.fields.url")}
                   required
                   value={url}
                   onChange={(event) => setUrl(event.target.value)}
-                  placeholder="https://example.com/webhooks/endpoint"
+                  placeholder={t(
+                    "moduleDefinitions.webhooks.createWizard.fields.urlPlaceholder",
+                  )}
                   disabled={createMutation.isPending}
                 />
                 <Input
-                  label="Secret"
+                  label={t("moduleDefinitions.webhooks.createWizard.fields.secret")}
                   required
                   value={secret}
                   onChange={(event) => setSecret(event.target.value)}
-                  placeholder="whsec_..."
+                  placeholder={t(
+                    "moduleDefinitions.webhooks.createWizard.fields.secretPlaceholder",
+                  )}
                   minLength={16}
                   maxLength={255}
                   disabled={createMutation.isPending}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Secret length must be between 16 and 255 characters.
+                  {t("moduleDefinitions.webhooks.createWizard.fields.secretHint")}
                 </p>
                 <div className="flex flex-col gap-2">
-                  <span className="text-xs font-medium">Event types</span>
+                  <span className="text-xs font-medium">
+                    {t("moduleDefinitions.webhooks.createWizard.fields.eventTypes")}
+                  </span>
                   <div className="max-h-40 overflow-y-auto rounded-md border p-2">
                     {availableEventTypes.length === 0 && (
                       <div className="text-sm text-muted-foreground">
-                        No event types available.
+                        {t(
+                          "moduleDefinitions.webhooks.createWizard.fields.noEventTypes",
+                        )}
                       </div>
                     )}
                     {availableEventTypes.length > 0 && (
@@ -184,10 +202,10 @@ export default function WebhookCreateWizardDialog() {
                   onClick={() => handleOpenChange(false)}
                   disabled={createMutation.isPending}
                 >
-                  Cancel
+                  {t("moduleDefinitions.webhooks.createWizard.actions.cancel")}
                 </Button>
                 <Button onClick={handleCreate} loading={createMutation.isPending}>
-                  Create
+                  {t("moduleDefinitions.webhooks.createWizard.actions.create")}
                 </Button>
               </DialogFooter>
             </>
@@ -196,16 +214,20 @@ export default function WebhookCreateWizardDialog() {
           {createdId && (
             <>
               <DialogHeader>
-                <DialogTitle>Webhook Created</DialogTitle>
+                <DialogTitle>
+                  {t("moduleDefinitions.webhooks.createWizard.created.title")}
+                </DialogTitle>
                 <DialogDescription>
-                  Your webhook has been created successfully.
+                  {t("moduleDefinitions.webhooks.createWizard.created.description")}
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
                 <Button variant="ghost" onClick={() => handleOpenChange(false)}>
-                  Close
+                  {t("moduleDefinitions.webhooks.createWizard.actions.close")}
                 </Button>
-                <Button onClick={handleOpenDetail}>Open Detail</Button>
+                <Button onClick={handleOpenDetail}>
+                  {t("moduleDefinitions.webhooks.createWizard.actions.openDetail")}
+                </Button>
               </DialogFooter>
             </>
           )}

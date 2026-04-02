@@ -17,18 +17,18 @@ public class ApiKeyListDTO {
     @DisplayField(header = "Id", order = 1, hidden = true, sortable = false, filterable = false)
     private String id;
 
-    @DisplayField(header = "Name", order = 2, type = DisplayFieldType.REFERENCE, referenceKey = "id", referenceTemplate = "/t/{tenantSlug}/api-keys/{id}")
+    @DisplayField(header = "moduleDefinitions.apiKeys.columns.name", order = 2, type = DisplayFieldType.REFERENCE, referenceKey = "id", referenceTemplate = "/t/{tenantSlug}/api-keys/{id}")
     private String name;
 
-    @DisplayField(header = "Public Key", order = 3)
+    @DisplayField(header = "moduleDefinitions.apiKeys.columns.publicKey", order = 3, type = DisplayFieldType.MONO, copyable = true)
     private String publicKey;
 
-    @DisplayField(header = "Status", order = 4, type = DisplayFieldType.ENUM)
+    @DisplayField(header = "moduleDefinitions.apiKeys.columns.status", order = 4, type = DisplayFieldType.ENUM)
     private String status;
 
-    @DisplayField(header = "Last Used", order = 5, type = DisplayFieldType.DATETIME)
+    @DisplayField(header = "moduleDefinitions.apiKeys.columns.lastUsedAt", order = 5, type = DisplayFieldType.DATETIME)
     private Instant lastUsedAt;
 
-    @DisplayField(header = "Created At", order = 6, type = DisplayFieldType.DATETIME)
+    @DisplayField(header = "moduleDefinitions.apiKeys.columns.createdAt", order = 6, type = DisplayFieldType.DATETIME)
     private Instant createdAt;
 }

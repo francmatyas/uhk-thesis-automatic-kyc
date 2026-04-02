@@ -10,4 +10,5 @@ public enum DisplayFieldType {
     REFERENCE,
     IMAGE,
     ENUM,
+    MONO,
 }

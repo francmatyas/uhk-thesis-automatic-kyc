@@ -3,6 +3,12 @@
 ## Konfigurace prostředí
 Relevantní proměnné prostředí:
 - `AMQP_URL`: adresa RabbitMQ,
+- `AMQP_MTLS_ENABLED`: zapnutí mTLS pro AMQP (`true`/`false`, default `false`),
+- `AMQP_CA_FILE`: cesta k CA certifikátu pro ověření server certifikátu (volitelné, jinak systémový trust store),
+- `AMQP_CLIENT_CERT_FILE`: cesta ke klientskému certifikátu pro mTLS,
+- `AMQP_CLIENT_KEY_FILE`: cesta ke klientskému privátnímu klíči pro mTLS,
+- `AMQP_CLIENT_KEY_PASSWORD`: heslo ke klientskému klíči (volitelné),
+- `AMQP_TLS_INSECURE`: vypne verifikaci server certifikátu (`true`/`false`, default `false`; pouze pro lokální testy),
 - `WORKER_TYPE`: logický typ workeru,
 - `PREFETCH`: QoS limit neackovaných zpráv,
 - `AML_DB_PATH`: cesta k AML databázi (volitelně, default `data/aml.db`).

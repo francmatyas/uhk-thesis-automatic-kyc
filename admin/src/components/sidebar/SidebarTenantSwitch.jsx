@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
@@ -21,6 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 import { getSwitchTargetPath } from "@/router/scope";
 export default function SidebarTenantSwitch({ className }) {
+  const { t } = useTranslation();
   const { user, tenants, activeTenantId, activeScope, routeTenantSlug } =
     useAuth();
   const navigate = useNavigate();
@@ -42,8 +44,8 @@ export default function SidebarTenantSwitch({ className }) {
     [tenantList, routeTenantSlug, activeTenantId],
   );
   const activeLabel =
-    activeTenant?.name || (hasProviderOption ? "Provider" : "");
-  const activeInitials = getInitials(activeLabel || "T");
+    activeTenant?.name || (hasProviderOption ? t("sidebar.tenantSwitch.provider") : "");
+  const activeInitials = getInitials(activeLabel || t("sidebar.tenantSwitch.fallbackInitial"));
 
   if (shouldRender) {
     const handleSwitch = async ({ scope, tenantSlug }) => {
@@ -58,7 +60,7 @@ export default function SidebarTenantSwitch({ className }) {
       try {
         navigate(nextPath);
       } catch {
-        toast.error("Failed to switch scope. Please try again.");
+        toast.error(t("sidebar.tenantSwitch.switchFailed"));
       } finally {
         setIsSwitching(false);
       }
@@ -100,10 +102,12 @@ export default function SidebarTenantSwitch({ className }) {
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
-                    {activeLabel || "Tenant"}
+                    {activeLabel || t("sidebar.tenantSwitch.tenant")}
                   </span>
                   <span className="truncate text-xs text-muted-foreground">
-                    {activeTenant ? "Tenant Workspace" : "Provider Workspace"}
+                    {activeTenant
+                      ? t("sidebar.tenantSwitch.tenantWorkspace")
+                      : t("sidebar.tenantSwitch.providerWorkspace")}
                   </span>
                 </div>
                 <ChevronsUpDown className="ml-auto size-4" />
@@ -115,7 +119,9 @@ export default function SidebarTenantSwitch({ className }) {
               align="start"
               sideOffset={4}
             >
-              <DropdownMenuLabel>Switch Workspace</DropdownMenuLabel>
+              <DropdownMenuLabel>
+                {t("sidebar.tenantSwitch.switchWorkspace")}
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
               {hasProviderOption && (
                 <>
@@ -130,12 +136,17 @@ export default function SidebarTenantSwitch({ className }) {
                     }}
                   >
                     <Avatar className="h-6 w-6 rounded-md">
-                      <AvatarImage src={null} alt="Provider" />
+                      <AvatarImage
+                        src={null}
+                        alt={t("sidebar.tenantSwitch.provider")}
+                      />
                       <AvatarFallback className="rounded-md">
-                        {getInitials("Provider")}
+                        {getInitials(t("sidebar.tenantSwitch.provider"))}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="flex-1">Provider</span>
+                    <span className="flex-1">
+                      {t("sidebar.tenantSwitch.provider")}
+                    </span>
                     {isProviderActive && (
                       <Check className="size-4 text-muted-foreground" />
                     )}
@@ -145,7 +156,7 @@ export default function SidebarTenantSwitch({ className }) {
               )}
               {tenantList.map((tenant) => {
                 const isActive = tenant?.id === activeTenantId;
-                const tenantLabel = tenant?.name || "Tenant";
+                const tenantLabel = tenant?.name || t("sidebar.tenantSwitch.tenant");
                 return (
                   <DropdownMenuItem
                     key={tenant.id}

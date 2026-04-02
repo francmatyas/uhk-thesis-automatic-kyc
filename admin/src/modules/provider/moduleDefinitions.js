@@ -1,4 +1,4 @@
-import { ConfigJsonEditor } from "@/components/ConfigJsonEditor";
+import { ConfigJsonEditor } from "@/views/journeyTemplates/ConfigJsonEditor";
 import { fetchAuditLog as fetchProviderAuditLog } from "@/api/provider/auditLogs";
 import {
   createPermission,
@@ -56,7 +56,47 @@ export const providerModuleDefinitions = {
       module: "auditLogs",
       basePath: "/provider/audit-logs",
       showCreateButton: false,
-      searchPlaceholder: "Search Audit Logs",
+      searchPlaceholder: "moduleDefinitions.auditLogs.search",
+      enumConfig: {
+        result: {
+          type: "ENUM",
+          displayMode: "badge",
+          enumValues: [
+            {
+              value: "SUCCESS",
+              label: "moduleDefinitions.auditLogs.enums.result.success",
+              status: "success",
+            },
+            {
+              value: "FAILURE",
+              label: "moduleDefinitions.auditLogs.enums.result.failure",
+              status: "failed",
+            },
+          ],
+        },
+        actorType: {
+          type: "ENUM",
+          displayMode: "text",
+          enumValues: [
+            {
+              value: "USER",
+              label: "moduleDefinitions.auditLogs.enums.actor.user",
+            },
+            {
+              value: "SYSTEM",
+              label: "moduleDefinitions.auditLogs.enums.actor.system",
+            },
+            {
+              value: "API_KEY",
+              label: "moduleDefinitions.auditLogs.enums.actor.api_key",
+            },
+            {
+              value: "SERVICE",
+              label: "moduleDefinitions.auditLogs.enums.actor.service",
+            },
+          ],
+        },
+      },
     },
     routes: {
       list: () => toProviderPath("/audit-logs"),
@@ -71,17 +111,66 @@ export const providerModuleDefinitions = {
       defaultValues: {},
       showDelete: false,
       showCreate: false,
+      showSave: false,
       readOnly: true,
       fields: [
-        { name: "action", type: "text", label: "Action" },
-        { name: "actorType", type: "text", label: "Actor Type" },
-        { name: "entityType", type: "text", label: "Entity Type" },
-        { name: "result", type: "text", label: "Status" },
-        { name: "errorCode", type: "text", label: "Error Code" },
+        {
+          name: "action",
+          type: "text",
+          label: "moduleDefinitions.auditLogs.detailFields.action",
+        },
+        {
+          name: "actorType",
+          type: "enum",
+          label: "moduleDefinitions.auditLogs.detailFields.actorType",
+          options: [
+            {
+              value: "USER",
+              label: "moduleDefinitions.auditLogs.enums.actor.user",
+            },
+            {
+              value: "SYSTEM",
+              label: "moduleDefinitions.auditLogs.enums.actor.system",
+            },
+            {
+              value: "API_KEY",
+              label: "moduleDefinitions.auditLogs.enums.actor.api_key",
+            },
+            {
+              value: "SERVICE",
+              label: "moduleDefinitions.auditLogs.enums.actor.service",
+            },
+          ],
+        },
+        {
+          name: "entityType",
+          type: "text",
+          label: "moduleDefinitions.auditLogs.detailFields.entityType",
+        },
+        {
+          name: "result",
+          type: "enum",
+          label: "moduleDefinitions.auditLogs.detailFields.result",
+          options: [
+            {
+              value: "SUCCESS",
+              label: "moduleDefinitions.auditLogs.enums.result.success",
+            },
+            {
+              value: "FAILURE",
+              label: "moduleDefinitions.auditLogs.enums.result.failure",
+            },
+          ],
+        },
+        {
+          name: "errorCode",
+          type: "text",
+          label: "moduleDefinitions.auditLogs.detailFields.errorCode",
+        },
         {
           name: "createdAt",
           type: "datetime",
-          label: "Timestamp",
+          label: "moduleDefinitions.auditLogs.detailFields.timestamp",
           fullWidth: true,
         },
       ],
@@ -100,8 +189,8 @@ export const providerModuleDefinitions = {
       module: "roles",
       basePath: "/provider/roles",
       createPath: toProviderPath("/roles/new"),
-      createLabel: "New Role",
-      searchPlaceholder: "Search Roles",
+      createLabel: "moduleDefinitions.roles.createLabel",
+      searchPlaceholder: "moduleDefinitions.roles.search",
       createPermission: "provider.roles:create",
     },
     routes: {
@@ -109,15 +198,15 @@ export const providerModuleDefinitions = {
       detail: (id) => toProviderPath(`/roles/${id}`),
     },
     messages: {
-      confirmDelete: "Are you sure you want to delete this role?",
+      confirmDelete: "moduleDefinitions.roles.messages.confirmDelete",
       success: {
-        create: "Role created successfully!",
-        update: "Role saved successfully!",
-        remove: "Role deleted successfully.",
+        create: "moduleDefinitions.roles.messages.success.create",
+        update: "moduleDefinitions.roles.messages.success.update",
+        remove: "moduleDefinitions.roles.messages.success.remove",
       },
       error: {
-        save: "Failed to save role. Please try again.",
-        remove: "Failed to delete role. Please try again.",
+        save: "moduleDefinitions.roles.messages.error.save",
+        remove: "moduleDefinitions.roles.messages.error.remove",
       },
     },
     detail: {
@@ -139,9 +228,9 @@ export const providerModuleDefinitions = {
         delete: "provider.roles:delete",
       },
       actionLabels: {
-        create: "Create Role",
-        save: "Save Changes",
-        delete: "Delete",
+        create: "moduleDefinitions.roles.actions.create",
+        save: "moduleDefinitions.roles.actions.save",
+        delete: "moduleDefinitions.roles.actions.delete",
       },
       transformEntityForForm: (entity) => ({
         ...entity,
@@ -173,17 +262,23 @@ export const providerModuleDefinitions = {
         {
           name: "scope",
           type: "enum",
-          label: "Scope",
+          label: "moduleDefinitions.roles.detailFields.scope",
           required: true,
           options: [
-            { value: "TENANT", label: "Tenant" },
-            { value: "PROVIDER", label: "Provider" },
+            {
+              value: "TENANT",
+              label: "moduleDefinitions.roles.enums.scope.tenant",
+            },
+            {
+              value: "PROVIDER",
+              label: "moduleDefinitions.roles.enums.scope.provider",
+            },
           ],
         },
         {
           name: "name",
           type: "text",
-          label: "Name",
+          label: "moduleDefinitions.roles.detailFields.name",
           required: true,
           registerOptions: { required: true },
           props: {
@@ -193,7 +288,7 @@ export const providerModuleDefinitions = {
         {
           name: "description",
           type: "textarea",
-          label: "Description",
+          label: "moduleDefinitions.roles.detailFields.description",
           fullWidth: true,
         },
         {
@@ -203,6 +298,7 @@ export const providerModuleDefinitions = {
             createElement(RolePermissionsField, {
               control,
               readOnly,
+              roleScope: watch("scope"),
             }),
         },
       ],
@@ -220,28 +316,30 @@ export const providerModuleDefinitions = {
     table: {
       module: "permissions",
       basePath: "/provider/permissions",
-      createPath: toProviderPath("/permissions/new"),
-      createLabel: "New Permission",
-      searchPlaceholder: "Search Permissions",
-      createPermission: "provider.permissions:create",
+      searchPlaceholder: "moduleDefinitions.permissions.search",
+      showCreateButton: false,
     },
     routes: {
       list: () => toProviderPath("/permissions"),
       detail: (id) => toProviderPath(`/permissions/${id}`),
     },
     messages: {
-      confirmDelete: "Are you sure you want to delete this permission?",
+      confirmDelete: "moduleDefinitions.permissions.messages.confirmDelete",
       success: {
-        create: "Permission created successfully!",
-        update: "Permission saved successfully!",
-        remove: "Permission deleted successfully.",
+        create: "moduleDefinitions.permissions.messages.success.create",
+        update: "moduleDefinitions.permissions.messages.success.update",
+        remove: "moduleDefinitions.permissions.messages.success.remove",
       },
       error: {
-        save: "Failed to save permission. Please try again.",
-        remove: "Failed to delete permission. Please try again.",
+        save: "moduleDefinitions.permissions.messages.error.save",
+        remove: "moduleDefinitions.permissions.messages.error.remove",
       },
     },
     detail: {
+      showDelete: false,
+      showCreate: false,
+      showSave: false,
+      readOnly: true,
       idParam: "permissionId",
       breadcrumb: {
         key: "permissions",
@@ -252,40 +350,47 @@ export const providerModuleDefinitions = {
         action: "",
         description: "",
       },
-      permissions: {
-        create: "provider.permissions:create",
-        update: "provider.permissions:update",
-        delete: "provider.permissions:delete",
-      },
       actionLabels: {
-        create: "Create Permission",
-        save: "Save Changes",
-        delete: "Delete",
+        create: "moduleDefinitions.permissions.actions.create",
+        save: "moduleDefinitions.permissions.actions.save",
+        delete: "moduleDefinitions.permissions.actions.delete",
       },
       fields: [
         {
           name: "resource",
           type: "text",
-          label: "Resource",
+          label: "moduleDefinitions.permissions.detailFields.resource",
           required: true,
           registerOptions: { required: true },
         },
         {
           name: "action",
           type: "enum",
-          label: "Action",
+          label: "moduleDefinitions.permissions.detailFields.action",
           required: true,
           options: [
-            { value: "create", label: "create" },
-            { value: "read", label: "read" },
-            { value: "update", label: "update" },
-            { value: "delete", label: "delete" },
+            {
+              value: "create",
+              label: "moduleDefinitions.permissions.enums.action.create",
+            },
+            {
+              value: "read",
+              label: "moduleDefinitions.permissions.enums.action.read",
+            },
+            {
+              value: "update",
+              label: "moduleDefinitions.permissions.enums.action.update",
+            },
+            {
+              value: "delete",
+              label: "moduleDefinitions.permissions.enums.action.delete",
+            },
           ],
         },
         {
           name: "description",
           type: "textarea",
-          label: "Description",
+          label: "moduleDefinitions.permissions.detailFields.description",
           fullWidth: true,
         },
       ],
@@ -304,22 +409,22 @@ export const providerModuleDefinitions = {
       module: "users",
       basePath: "/provider/users",
       showCreateButton: false,
-      searchPlaceholder: "Search Users",
+      searchPlaceholder: "moduleDefinitions.users.search",
     },
     routes: {
       list: () => toProviderPath("/users"),
       detail: (id) => toProviderPath(`/users/${id}`),
     },
     messages: {
-      confirmDelete: "Are you sure you want to delete this user?",
+      confirmDelete: "moduleDefinitions.users.messages.confirmDelete",
       success: {
-        create: "User created successfully!",
-        update: "User saved successfully!",
-        remove: "User deleted successfully.",
+        create: "moduleDefinitions.users.messages.success.create",
+        update: "moduleDefinitions.users.messages.success.update",
+        remove: "moduleDefinitions.users.messages.success.remove",
       },
       error: {
-        save: "Failed to save user. Please try again.",
-        remove: "Failed to delete user. Please try again.",
+        save: "moduleDefinitions.users.messages.error.save",
+        remove: "moduleDefinitions.users.messages.error.remove",
       },
     },
     detail: {
@@ -338,30 +443,30 @@ export const providerModuleDefinitions = {
         delete: "provider.users:delete",
       },
       actionLabels: {
-        create: "Create User",
-        save: "Save Changes",
-        delete: "Delete",
+        create: "moduleDefinitions.users.actions.create",
+        save: "moduleDefinitions.users.actions.save",
+        delete: "moduleDefinitions.users.actions.delete",
       },
       readOnly: ({ inEditMode }) => !inEditMode,
       fields: [
         {
           name: "givenName",
           type: "text",
-          label: "Given Name",
+          label: "moduleDefinitions.users.detailFields.givenName",
           required: true,
           registerOptions: { required: true },
         },
         {
           name: "familyName",
           type: "text",
-          label: "Family Name",
+          label: "moduleDefinitions.users.detailFields.familyName",
           required: true,
           registerOptions: { required: true },
         },
         {
           name: "email",
           type: "text",
-          label: "Email",
+          label: "moduleDefinitions.users.detailFields.email",
           required: true,
           registerOptions: { required: true },
           fullWidth: true,
@@ -369,11 +474,20 @@ export const providerModuleDefinitions = {
         {
           name: "gender",
           type: "enum",
-          label: "Gender",
+          label: "moduleDefinitions.users.detailFields.gender",
           options: [
-            { value: "MALE", label: "Male" },
-            { value: "FEMALE", label: "Female" },
-            { value: "OTHER", label: "Other" },
+            {
+              value: "MALE",
+              label: "moduleDefinitions.users.detailFields.male",
+            },
+            {
+              value: "FEMALE",
+              label: "moduleDefinitions.users.detailFields.female",
+            },
+            {
+              value: "OTHER",
+              label: "moduleDefinitions.users.detailFields.other",
+            },
           ],
           fullWidth: true,
         },
@@ -393,24 +507,42 @@ export const providerModuleDefinitions = {
       module: "tenants",
       basePath: "/provider/tenants",
       createPath: toProviderPath("/tenants/new"),
-      createLabel: "New Tenant",
-      searchPlaceholder: "Search Tenants",
+      createLabel: "moduleDefinitions.tenants.createLabel",
+      searchPlaceholder: "moduleDefinitions.tenants.search",
       createPermission: "provider.tenants:create",
+      enumConfig: {
+        status: {
+          type: "ENUM",
+          displayMode: "badge",
+          enumValues: [
+            {
+              value: "ACTIVE",
+              label: "moduleDefinitions.tenants.enums.status.active",
+              status: "success",
+            },
+            {
+              value: "SUSPENDED",
+              label: "moduleDefinitions.tenants.enums.status.suspended",
+              status: "warning",
+            },
+          ],
+        },
+      },
     },
     routes: {
       list: () => toProviderPath("/tenants"),
       detail: (id) => toProviderPath(`/tenants/${id}`),
     },
     messages: {
-      confirmDelete: "Are you sure you want to delete this tenant?",
+      confirmDelete: "moduleDefinitions.tenants.messages.confirmDelete",
       success: {
-        create: "Tenant created successfully!",
-        update: "Tenant saved successfully!",
-        remove: "Tenant deleted successfully.",
+        create: "moduleDefinitions.tenants.messages.success.create",
+        update: "moduleDefinitions.tenants.messages.success.update",
+        remove: "moduleDefinitions.tenants.messages.success.remove",
       },
       error: {
-        save: "Failed to save tenant. Please try again.",
-        remove: "Failed to delete tenant. Please try again.",
+        save: "moduleDefinitions.tenants.messages.error.save",
+        remove: "moduleDefinitions.tenants.messages.error.remove",
       },
     },
     detail: {
@@ -419,7 +551,7 @@ export const providerModuleDefinitions = {
         key: "tenants",
         labelField: "name",
       },
-      sectionTitle: "Tenant",
+      sectionTitle: "moduleDefinitions.sectionTitle.tenant",
       defaultValues: {
         name: "",
         slug: "",
@@ -431,33 +563,39 @@ export const providerModuleDefinitions = {
         delete: "provider.tenants:delete",
       },
       actionLabels: {
-        create: "Create Tenant",
-        save: "Save Changes",
-        delete: "Delete",
+        create: "moduleDefinitions.tenants.actions.create",
+        save: "moduleDefinitions.tenants.actions.save",
+        delete: "moduleDefinitions.tenants.actions.delete",
       },
       fields: [
         {
           name: "name",
           type: "text",
-          label: "Name",
+          label: "moduleDefinitions.tenants.detailFields.name",
           required: true,
           registerOptions: { required: true },
         },
         {
           name: "slug",
           type: "text",
-          label: "Slug",
+          label: "moduleDefinitions.tenants.detailFields.slug",
           required: true,
           registerOptions: { required: true },
         },
         {
-          name: "active",
+          name: "status",
           type: "enum",
-          label: "Active",
+          label: "moduleDefinitions.tenants.detailFields.status",
           required: true,
           options: [
-            { value: "ACTIVE", label: "Active" },
-            { value: "SUSPENDED", label: "Suspended" },
+            {
+              value: "ACTIVE",
+              label: "moduleDefinitions.tenants.enums.status.active",
+            },
+            {
+              value: "SUSPENDED",
+              label: "moduleDefinitions.tenants.enums.status.suspended",
+            },
           ],
         },
       ],
@@ -482,7 +620,62 @@ export const providerModuleDefinitions = {
       module: "verifications",
       basePath: "/provider/verifications",
       showCreateButton: false,
-      searchPlaceholder: "Search Verifications",
+      searchPlaceholder: "moduleDefinitions.verifications.search",
+      enumConfig: {
+        status: {
+          type: "ENUM",
+          displayMode: "badge", // or "text"
+          enumValues: [
+            {
+              value: "INITIATED",
+              label: "moduleDefinitions.verifications.enums.status.initiated",
+              status: "new",
+            },
+            {
+              value: "IN_PROGRESS",
+              label: "moduleDefinitions.verifications.enums.status.inProgress",
+              status: "new",
+            },
+            {
+              value: "READY_FOR_AUTOCHECK",
+              label:
+                "moduleDefinitions.verifications.enums.status.readyForAutoCheck",
+              status: "new",
+            },
+            {
+              value: "AUTO_PASSED",
+              label: "moduleDefinitions.verifications.enums.status.autoPassed",
+              status: "success",
+            },
+            {
+              value: "AUTO_FAILED",
+              label: "moduleDefinitions.verifications.enums.status.autoFailed",
+              status: "failed",
+            },
+            {
+              value: "REQUIRES_REVIEW",
+              label:
+                "moduleDefinitions.verifications.enums.status.requiresReview",
+              status: "warning",
+            },
+            {
+              value: "APPROVED",
+              label: "moduleDefinitions.verifications.enums.status.approved",
+              status: "success",
+            },
+            {
+              value: "REJECTED",
+              label: "moduleDefinitions.verifications.enums.status.rejected",
+              status: "failed",
+            },
+            {
+              value: "EXPIRED",
+              label: "moduleDefinitions.verifications.enums.status.expired",
+              status: "default",
+            },
+          ],
+        },
+      },
     },
     routes: {
       list: () => toProviderPath("/verifications"),
@@ -492,27 +685,49 @@ export const providerModuleDefinitions = {
       idParam: "verificationId",
       breadcrumb: {
         key: "verifications",
-        labelField: "status",
+        labelField: "clientName",
       },
       defaultValues: {},
       showDelete: false,
       showCreate: false,
+      showSave: false,
       readOnly: true,
       fields: [
-        { name: "status", type: "text", label: "Status" },
-        { name: "tenantId", type: "text", label: "Tenant ID" },
         {
-          name: "journeyTemplateId",
-          type: "text",
-          label: "Journey Template ID",
+          type: "relation",
+          label: "moduleDefinitions.verifications.detailFields.tenant",
+          idField: "tenantId",
+          nameField: "tenantName",
+          endpoint: "/tenants",
+          formatter: (item) => ({ label: item.name, value: item.id }),
+          getDetailPath: (id) => toProviderPath(`/tenants/${id}`),
+          fullWidth: true,
+          readOnly: true,
         },
-        { name: "clientIdentityId", type: "text", label: "Client Identity ID" },
-        { name: "expiresAt", type: "datetime", label: "Expires At" },
-        { name: "completedAt", type: "datetime", label: "Completed At" },
+        {
+          type: "relation",
+          label: "moduleDefinitions.verifications.detailFields.journeyTemplate",
+          idField: "journeyTemplateId",
+          nameField: "journeyTemplateName",
+          endpoint: "/journey-templates",
+          formatter: (item) => ({ label: item.name, value: item.id }),
+          getDetailPath: (id) => toProviderPath(`/journey-templates/${id}`),
+          fullWidth: true,
+        },
+        {
+          name: "expiresAt",
+          type: "datetime",
+          label: "moduleDefinitions.verifications.detailFields.expiresAt",
+        },
+        {
+          name: "completedAt",
+          type: "datetime",
+          label: "moduleDefinitions.verifications.detailFields.completedAt",
+        },
         {
           name: "createdAt",
           type: "datetime",
-          label: "Created At",
+          label: "moduleDefinitions.verifications.detailFields.createdAt",
           fullWidth: true,
         },
       ],
@@ -530,25 +745,42 @@ export const providerModuleDefinitions = {
     table: {
       module: "journeyTemplates",
       basePath: "/provider/journey-templates",
-      createPath: toProviderPath("/journey-templates/new"),
-      createLabel: "New Template",
-      searchPlaceholder: "Search Journey Templates",
-      createPermission: "provider.journey-templates:manage",
+      searchPlaceholder: "moduleDefinitions.journeyTemplates.search",
+      showCreateButton: false,
+      enumConfig: {
+        status: {
+          type: "ENUM",
+          displayMode: "badge", // or "text"
+          enumValues: [
+            {
+              value: "ACTIVE",
+              label: "moduleDefinitions.journeyTemplates.enums.status.active",
+              status: "new",
+            },
+            {
+              value: "ARCHIVED",
+              label: "moduleDefinitions.journeyTemplates.enums.status.archived",
+              status: "default",
+            },
+          ],
+        },
+      },
     },
     routes: {
       list: () => toProviderPath("/journey-templates"),
       detail: (id) => toProviderPath(`/journey-templates/${id}`),
     },
     messages: {
-      confirmDelete: "Are you sure you want to archive this journey template?",
+      confirmDelete:
+        "moduleDefinitions.journeyTemplates.messages.confirmDelete",
       success: {
-        create: "Journey template created successfully!",
-        update: "Journey template saved successfully!",
-        remove: "Journey template archived successfully.",
+        create: "moduleDefinitions.journeyTemplates.messages.success.create",
+        update: "moduleDefinitions.journeyTemplates.messages.success.update",
+        remove: "moduleDefinitions.journeyTemplates.messages.success.remove",
       },
       error: {
-        save: "Failed to save journey template. Please try again.",
-        remove: "Failed to archive journey template. Please try again.",
+        save: "moduleDefinitions.journeyTemplates.messages.error.save",
+        remove: "moduleDefinitions.journeyTemplates.messages.error.remove",
       },
     },
     detail: {
@@ -564,41 +796,54 @@ export const providerModuleDefinitions = {
         configJson: null,
       },
       permissions: {
-        create: "provider.journey-templates:manage",
-        update: "provider.journey-templates:manage",
-        delete: "provider.journey-templates:manage",
+        create: "provider.journey-templates:create",
+        update: "provider.journey-templates:edit",
+        delete: "provider.journey-templates:delete",
       },
       actionLabels: {
-        create: "Create Template",
-        save: "Save Changes",
-        delete: "Archive",
+        create: "moduleDefinitions.journeyTemplates.actions.create",
+        save: "moduleDefinitions.journeyTemplates.actions.save",
+        delete: "moduleDefinitions.journeyTemplates.actions.delete",
       },
+      showDelete: false,
       fields: ({ inEditMode }) => [
+        {
+          name: "id",
+          type: "copy",
+          label: "moduleDefinitions.journeyTemplates.detailFields.id",
+          fullWidth: true,
+        },
         {
           name: "name",
           type: "text",
-          label: "Name",
+          label: "moduleDefinitions.journeyTemplates.detailFields.name",
           required: true,
           registerOptions: { required: true },
         },
         {
           name: "status",
           type: "enum",
-          label: "Status",
+          label: "moduleDefinitions.journeyTemplates.detailFields.status",
           options: [
-            { value: "ACTIVE", label: "Active" },
-            { value: "ARCHIVED", label: "Archived" },
+            {
+              value: "ACTIVE",
+              label: "moduleDefinitions.journeyTemplates.enums.status.active",
+            },
+            {
+              value: "ARCHIVED",
+              label: "moduleDefinitions.journeyTemplates.enums.status.archived",
+            },
           ],
         },
         {
           name: "description",
           type: "textarea",
-          label: "Description",
+          label: "moduleDefinitions.journeyTemplates.detailFields.description",
           fullWidth: true,
         },
         {
           name: "configJson",
-          label: "Config JSON",
+          label: "moduleDefinitions.journeyTemplates.detailFields.configJson",
           fullWidth: true,
           render: ({ control, readOnly }) =>
             createElement(ConfigJsonEditor, { control, readOnly }),

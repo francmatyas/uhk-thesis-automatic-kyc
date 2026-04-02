@@ -29,13 +29,14 @@ public class PolicyService {
         Set<RoleScope> allowedScopes = EnumSet.noneOf(RoleScope.class);
 
         if (u.isProviderUser()) {
-            // Provider uživatelé si vždy ponechávají oprávnění v provider oblasti.
-            // Pokud je vybraný aktivní tenant, přidej i tenant scoped oprávnění pro něj.
-            assignments = new ArrayList<>(userTenantRoleRepository.findAllByUserIdAndTenantId(u.getId(), null));
-            allowedScopes.add(RoleScope.PROVIDER);
             if (activeTenantId != null) {
-                assignments.addAll(userTenantRoleRepository.findAllByUserIdAndTenantId(u.getId(), activeTenantId));
+                // Provider uživatel přepnut do kontextu tenanta — pouze tenant scoped oprávnění.
+                assignments = new ArrayList<>(userTenantRoleRepository.findAllByUserIdAndTenantId(u.getId(), activeTenantId));
                 allowedScopes.add(RoleScope.TENANT);
+            } else {
+                // Provider uživatel v provider kontextu — pouze provider scoped oprávnění.
+                assignments = new ArrayList<>(userTenantRoleRepository.findAllByUserIdAndTenantId(u.getId(), null));
+                allowedScopes.add(RoleScope.PROVIDER);
             }
         } else {
             // Tenant uživatelé vyhodnocují pouze tenant scoped role pro aktivního tenanta.

@@ -8,7 +8,6 @@ import java.util.UUID;
 
 public record ClientIdentityResponse(
         UUID id,
-        UUID tenantId,
         String externalReference,
         // Uvedeno klientem
         String firstName,
@@ -27,19 +26,16 @@ public record ClientIdentityResponse(
         String issuingCountry,
         String nationality,
         String placeOfBirth,
-        String address,
-        Instant createdAt,
-        Instant updatedAt
+        String address
 ) {
     public static ClientIdentityResponse from(ClientIdentity c) {
         return new ClientIdentityResponse(
-                c.getId(), c.getTenantId(), c.getExternalReference(),
+                c.getId(), c.getExternalReference(),
                 c.getFirstName(), c.getLastName(), c.getDateOfBirth(),
                 c.getCountryOfResidence(), c.getEmail(), c.getDialCode(), c.getPhone(),
                 c.getDocumentType(), c.getDocumentNumber(), c.getDocumentExpiresAt(),
                 c.getSex(), c.getNationalNumber(), c.getIssuingCountry(),
-                c.getNationality(), c.getPlaceOfBirth(), c.getAddress(),
-                c.getCreatedAt(), c.getUpdatedAt()
+                c.getNationality(), c.getPlaceOfBirth(), c.getAddress()
         );
     }
 }

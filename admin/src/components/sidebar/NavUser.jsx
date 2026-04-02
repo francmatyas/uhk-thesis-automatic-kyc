@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/sidebar";
 
 import { Link, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 
 import { useAuth } from "@/contexts/AuthContext";
 import * as authApi from "@/api/auth";
@@ -31,6 +32,7 @@ import { toProviderPath, toTenantPath } from "@/router/scope";
 import { queryClient } from "@/main";
 
 export default function NavUser() {
+  const { t } = useTranslation();
   const { isMobile } = useSidebar();
   const navigate = useNavigate();
 
@@ -94,13 +96,13 @@ export default function NavUser() {
                 <Link to={profilePath}>
                   <DropdownMenuItem>
                     <User />
-                    Profile
+                    {t("sidebar.userMenu.profile")}
                   </DropdownMenuItem>
                 </Link>
                 <Link to={settingsBasePath}>
                   <DropdownMenuItem>
                     <Settings />
-                    Settings
+                    {t("sidebar.userMenu.settings")}
                   </DropdownMenuItem>
                 </Link>
               </DropdownMenuGroup>
@@ -116,7 +118,7 @@ export default function NavUser() {
                 }}
               >
                 <LogOut />
-                Log out
+                {t("sidebar.userMenu.logout")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

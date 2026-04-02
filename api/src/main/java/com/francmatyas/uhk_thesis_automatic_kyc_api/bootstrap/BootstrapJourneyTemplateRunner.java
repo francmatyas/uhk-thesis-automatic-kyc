@@ -1,7 +1,6 @@
 package com.francmatyas.uhk_thesis_automatic_kyc_api.bootstrap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.journey_template.model.JourneyTemplate;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.journey_template.model.JourneyTemplateStatus;
@@ -51,16 +50,13 @@ public class BootstrapJourneyTemplateRunner implements ApplicationRunner {
         }
 
         ObjectNode config = objectMapper.createObjectNode();
-        ArrayNode checks = config.putArray("checks");
-        checks.add("DOC_OCR");
-        checks.add("LIVENESS");
-        checks.add("SANCTIONS");
-        checks.add("PEP");
+        config.putArray("allowedDocumentTypes").add("CZECH_ID").add("PASSPORT");
+        config.putArray("optionalSteps");
 
         JourneyTemplate template = new JourneyTemplate();
         template.setTenantId(tenant.getId());
         template.setName(TEMPLATE_NAME);
-        template.setDescription("Document check, liveness, sanctions screening and PEP check");
+        template.setDescription("Full KYC: document check, liveness, face match and AML screening");
         template.setConfigJson(config);
         template.setStatus(JourneyTemplateStatus.ACTIVE);
 

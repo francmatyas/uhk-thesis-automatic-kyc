@@ -1,9 +1,14 @@
 import asyncio
+import contextlib
 import dataclasses
 import logging
 import os
+import tempfile
+import urllib.request
+from contextlib import contextmanager
 from datetime import datetime, timezone
-from typing import Any, Callable, Optional
+from pathlib import Path
+from typing import Any, Callable, Iterator, Optional
 
 import aio_pika
 
@@ -24,6 +29,25 @@ from .biometrics.liveness_check import check_liveness
 from .aml.screener import AmlScreener
 
 logger = logging.getLogger(__name__)
+
+
+@contextmanager
+def _local_path(url_or_path: Optional[str]) -> Iterator[Optional[str]]:
+    """Vrátí lokální cestu k souboru; pokud je potřeba, stáhne URL do dočasného souboru."""
+    if url_or_path is None:
+        yield None
+        return
+    if not url_or_path.startswith("http://") and not url_or_path.startswith("https://"):
+        yield url_or_path
+        return
+    suffix = Path(url_or_path.split("?")[0]).suffix or ".jpg"
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+        tmp_path = tmp.name
+    try:
+        urllib.request.urlretrieve(url_or_path, tmp_path)
+        yield tmp_path
+    finally:
+        Path(tmp_path).unlink(missing_ok=True)
 
 
 class WorkerRuntime:
@@ -123,7 +147,6 @@ class WorkerRuntime:
             idempotencyKey=body.get("idempotencyKey"),
         )
         job_id = cmd.jobId
-        print(cmd)
 
         reply_base: Optional[str] = None
         if msg.headers:
@@ -258,9 +281,10 @@ class WorkerRuntime:
             raise asyncio.CancelledError
 
         loop = asyncio.get_running_loop()
-        result = await loop.run_in_executor(
-            None, lambda: read_czech_id(back_path, front_path)
-        )
+        with _local_path(back_path) as local_back, _local_path(front_path) as local_front:
+            result = await loop.run_in_executor(
+                None, lambda: read_czech_id(local_back, local_front)
+            )
 
         on_progress(90, "done")
         if result is None:
@@ -284,9 +308,10 @@ class WorkerRuntime:
             raise asyncio.CancelledError
 
         loop = asyncio.get_running_loop()
-        result = await loop.run_in_executor(
-            None, lambda: read_passport(image_path)
-        )
+        with _local_path(image_path) as local_path:
+            result = await loop.run_in_executor(
+                None, lambda: read_passport(local_path)
+            )
 
         on_progress(90, "done")
         if result is None:
@@ -313,9 +338,10 @@ class WorkerRuntime:
             raise asyncio.CancelledError
 
         loop = asyncio.get_running_loop()
-        result = await loop.run_in_executor(
-            None, lambda: compare_faces(document_path, selfie_path)
-        )
+        with _local_path(document_path) as local_doc, _local_path(selfie_path) as local_selfie:
+            result = await loop.run_in_executor(
+                None, lambda: compare_faces(local_doc, local_selfie)
+            )
 
         on_progress(90, "done")
         return dataclasses.asdict(result)
@@ -336,9 +362,11 @@ class WorkerRuntime:
             raise asyncio.CancelledError
 
         loop = asyncio.get_running_loop()
-        result = await loop.run_in_executor(
-            None, lambda: check_liveness(image_paths)
-        )
+        with contextlib.ExitStack() as stack:
+            local_paths = [stack.enter_context(_local_path(p)) for p in image_paths]
+            result = await loop.run_in_executor(
+                None, lambda: check_liveness(local_paths)
+            )
 
         on_progress(90, "done")
         return dataclasses.asdict(result)

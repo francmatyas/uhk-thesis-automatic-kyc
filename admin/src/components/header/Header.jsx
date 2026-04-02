@@ -1,8 +1,4 @@
 import { Breadcrumb } from "./Breadcrumb";
-import { Button } from "@/components/ui/button";
-import { Search, Bell } from "lucide-react";
-import { SearchToggle } from "./SearchToggle";
-import { NotificationCenter } from "./NotificationCenter";
 import { useLocation, matchRoutes } from "react-router";
 import { routes } from "@/router/routes";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -39,10 +35,6 @@ export default function Header() {
           {headerControls ?? <Breadcrumb />}
         </div>
       </div>
-      {/* <div className="flex items-center gap-2">
-        <SearchToggle />
-        <NotificationCenter />
-      </div> */}
     </header>
   );
 }

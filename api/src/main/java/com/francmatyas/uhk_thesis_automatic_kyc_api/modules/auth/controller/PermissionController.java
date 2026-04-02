@@ -45,7 +45,7 @@ public class PermissionController {
         }
     }
 
-    @PostMapping
+    /*@PostMapping
     @PreAuthorize("hasAuthority('PERM_provider.permissions:create')")
     public ResponseEntity<?> create(@AuthenticationPrincipal User currentUser, @Valid @RequestBody PermissionDTO dto, HttpServletRequest httpReq) {
         try {
@@ -79,7 +79,7 @@ public class PermissionController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
-    }
+    }*/
 
     private void audit(User actor, HttpServletRequest req, String entityType, Object entityId, String action, Object oldValue, Object newValue) {
         try {

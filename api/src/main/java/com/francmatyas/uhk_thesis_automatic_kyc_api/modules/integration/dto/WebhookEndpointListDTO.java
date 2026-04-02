@@ -17,15 +17,15 @@ public class WebhookEndpointListDTO {
     @DisplayField(header = "Id", order = 1, hidden = true, sortable = false, filterable = false)
     private String id;
 
-    @DisplayField(header = "URL", order = 2, type = DisplayFieldType.REFERENCE, referenceKey = "id", referenceTemplate = "/t/{tenantSlug}/webhooks/{id}")
+    @DisplayField(header = "moduleDefinitions.webhooks.columns.url", order = 2, type = DisplayFieldType.REFERENCE, referenceKey = "id", referenceTemplate = "/t/{tenantSlug}/webhooks/{id}")
     private String url;
 
-    @DisplayField(header = "Status", order = 3, type = DisplayFieldType.ENUM)
+    @DisplayField(header = "moduleDefinitions.webhooks.columns.status", order = 3, type = DisplayFieldType.ENUM)
     private String status;
 
-    @DisplayField(header = "Last Delivery", order = 4, type = DisplayFieldType.DATETIME)
+    @DisplayField(header = "moduleDefinitions.webhooks.columns.lastDeliveryAt", order = 4, type = DisplayFieldType.DATETIME)
     private Instant lastDeliveryAt;
 
-    @DisplayField(header = "Created At", order = 5, type = DisplayFieldType.DATETIME)
+    @DisplayField(header = "moduleDefinitions.webhooks.columns.createdAt", order = 5, type = DisplayFieldType.DATETIME)
     private Instant createdAt;
 }

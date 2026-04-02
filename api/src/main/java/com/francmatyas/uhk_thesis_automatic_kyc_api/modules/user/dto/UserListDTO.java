@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 public class UserListDTO {
     @DisplayField(header = "Id", order = 1, hidden = true, sortable = false, filterable = false)
     private String id;
-    @DisplayField(header = "Name", order = 2, type = DisplayFieldType.REFERENCE, referenceKey = "id", referenceTemplate = "/t/{tenantSlug}/members/{id}")
+    @DisplayField(header = "moduleDefinitions.members.columns.name", order = 2, type = DisplayFieldType.REFERENCE, referenceKey = "id", referenceTemplate = "/t/{tenantSlug}/members/{id}")
     private String fullName;
-    @DisplayField(header = "Email", order = 3)
+    @DisplayField(header = "moduleDefinitions.members.columns.email", order = 3)
     private String email;
 }
