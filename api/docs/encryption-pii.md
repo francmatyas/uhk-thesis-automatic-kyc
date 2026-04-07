@@ -80,34 +80,19 @@ private Instant dateOfBirth;
 ```
 
 ## 5. Přehled šifrovaných polí
+Šifrovaná pole jsou definována přes `@Convert(...)` v entitách. Níže je praktický přehled hlavních domén:
 
-### 5.1 Entita `users`
-| Pole | Typ | Poznámka |
-|---|---|---|
-| `givenName` | String | Křestní jméno |
-| `middleName` | String | Prostřední jméno |
-| `familyName` | String | Příjmení |
-| `fullName` | String | Plné jméno |
-| `email` | String | Primární e-mail |
-
-### 5.2 Entita `user_profiles`
-| Pole | Typ |
+| Doména | Příklady šifrovaných polí |
 |---|---|
-| `phoneNumber` | String |
-| `dialCode` | String |
-| `gender` | String |
-| `dateOfBirth` | Instant |
+| Uživatelé | `users.givenName`, `users.middleName`, `users.familyName`, `users.fullName`, `users.email` |
+| Profil a sessions | `user_profiles.phoneNumber`, `user_profiles.dialCode`, `user_profiles.gender`, `user_profiles.dateOfBirth`, `user_sessions.ipAddress`, `user_sessions.userAgent` |
+| Tenant a identita klienta | `tenants.name`, více polí v `client_identities` (jméno, doklady, adresy, narození apod.) |
+| Dokumenty | `stored_documents.storage_key`, `stored_documents.original_filename` |
+| Integrace/webhooky | `webhook_endpoints.url`, `webhook_endpoints.secret`, `webhook_delivery_jobs.event_payload`, `webhook_delivery_attempts.response_body` |
+| Audit | `audit_logs.old_value`, `audit_logs.new_value`, `audit_logs.ip_address`, `audit_logs.user_agent` |
+| Worker/KYC data | `worker_jobs.payload/result/error`, `check_results.details_json`, `verification_otps.contact` |
 
-### 5.3 Entita `user_sessions`
-| Pole | Typ |
-|---|---|
-| `ipAddress` | String |
-| `userAgent` | String |
-
-### 5.4 Entita `webhook_endpoints`
-| Pole | Typ | Poznámka |
-|---|---|---|
-| `secret` | String | Secret pro podpis webhook zpráv |
+Pro úplný aktuální seznam je směrodatné vyhledání `@Convert(converter = Encrypted...)` v kódu.
 
 ## 6. Vyhledávání e-mailu bez dešifrování
 Pro efektivní lookup se ukládá deterministický HMAC hash:
@@ -127,6 +112,8 @@ U starších záznamů může být e-mail uložen nešifrovaně. Služba nejprve
 |---|---|
 | `V4__users_encrypted_fields_and_email_hash.sql` | Přidání `email_hash`, úprava sloupců uživatele |
 | `V11__encrypt_pii_fields.sql` | Rozšíření sloupců v `user_profiles` a `user_sessions` na `text` |
+| `V12__encrypt_sensitive_fields.sql` | Rozšíření šifrování citlivých dat v dalších modulech |
+| `V13__encrypt_audit_log_values.sql` | Šifrování vybraných hodnot v audit logu |
 
 ## 8. Bezpečnostní a regulatorní dopady
 Šifrování na úrovni polí minimalizuje riziko úniku PII při:

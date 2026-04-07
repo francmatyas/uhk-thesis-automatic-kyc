@@ -10,7 +10,7 @@ Webhook endpoint je tenant-scoped objekt s atributy:
 - `status` (`ACTIVE` nebo `DISABLED`),
 - odebírané `eventTypes`.
 
-`secret` je perzistentně ukládán šifrovaně.
+`url` i `secret` jsou perzistentně ukládány šifrovaně.
 
 ## 3. Správa webhook endpointů
 Správa probíhá pod `/integrations` a vyžaduje autentizovanou uživatelskou session s aktivním tenant kontextem.
@@ -35,7 +35,7 @@ Správa probíhá pod `/integrations` a vyžaduje autentizovanou uživatelskou s
 ### 3.3 Options endpoint
 `GET /integrations/webhooks/options` vrací:
 - `statuses`: `ACTIVE`, `DISABLED`,
-- `eventTypes`: aktuálně `document.ready`, `document.deleted`.
+- `eventTypes`: aktuální katalog eventů (viz sekce 4).
 
 ### 3.4 Detail endpointu
 Vrací:
@@ -52,12 +52,13 @@ Příklad:
 {
   "url": "https://example.com/webhooks/automatic-kyc",
   "secret": "whsec_vlastni_tajny_retezec",
-  "eventTypes": ["document.ready", "document.deleted"]
+  "eventTypes": ["verification.completed", "verification.failed"]
 }
 ```
 
 Pravidla:
 - `url` je povinné (`http`/`https`, validní host),
+- URL nesmí resolveovat na privátní/loopback/link-local adresy (SSRF ochrana),
 - `secret` je volitelné:
   - pokud chybí, je vygenerováno,
   - pokud je posláno, validuje se rozsah délky `16..255`,
@@ -71,7 +72,7 @@ Příklad:
 ```json
 {
   "status": "DISABLED",
-  "eventTypes": ["document.ready"]
+  "eventTypes": ["verification.completed"]
 }
 ```
 
@@ -90,11 +91,20 @@ Pravidla:
 - subscriptions se při mazání endpointu odstraňují.
 
 ## 4. Podporované události
-Aktuálně:
+Aktuální katalog:
 - `document.ready`
 - `document.deleted`
+- `verification.completed`
+- `verification.failed`
+- `verification.requires_review`
+- `verification.approved`
+- `verification.rejected`
+- `verification.expired`
 
-Události jsou enqueueovány z `DocumentService`.
+Emitování událostí:
+- `document.*`: `DocumentService`
+- `verification.completed|failed|requires_review`: `VerificationStepService`
+- `verification.approved|rejected|expired`: `VerificationService`
 
 ## 5. Kontrakt odchozího webhook požadavku
 Dispatcher odesílá na endpoint HTTP `POST` s JSON payloadem.
@@ -114,31 +124,24 @@ Dispatcher odesílá na endpoint HTTP `POST` s JSON payloadem.
 ```json
 {
   "id": "delivery-job-uuid",
-  "type": "document.ready",
+  "type": "verification.completed",
   "createdAt": "2026-03-14T10:15:30Z",
   "attempt": 1,
   "tenantId": "tenant-uuid",
   "data": {
-    "documentId": "document-uuid",
-    "ownerType": "USER",
-    "ownerId": "owner-uuid",
+    "verificationId": "verification-uuid",
     "tenantId": "tenant-uuid",
-    "category": "INVOICE",
-    "kind": "UPLOADED",
-    "status": "READY",
-    "storageKey": "documents/...",
-    "contentType": "application/pdf",
-    "originalFilename": "invoice.pdf",
-    "sizeBytes": 12345,
-    "checksum": "sha256:...",
-    "createdAt": "2026-03-14T10:15:00Z",
-    "updatedAt": "2026-03-14T10:15:30Z",
-    "publicUrl": "https://..."
+    "status": "AUTO_PASSED",
+    "overallScore": 0.91,
+    "journeyTemplateId": "journey-template-uuid",
+    "completedAt": "2026-03-14T10:15:00Z",
+    "createdAt": "2026-03-14T09:59:00Z"
   }
 }
 ```
 
-Pole `correlationId` a `requestId` se mohou objevit, pokud jsou přítomna při enqueue.
+Pole `correlationId` a `requestId` se mohou objevit, pokud jsou přítomná při enqueue.
+Struktura `data` je závislá na typu eventu.
 
 ## 6. Ověření podpisu
 Podpis je založen na:
@@ -159,7 +162,7 @@ function verifySignature(secret, timestamp, rawBody, receivedSignature) {
 ```
 
 ## 7. Doručování a retry politika
-- doručování je asynchronní (dispatcher joby),
+- doručování je asynchronní (tabulka `webhook_delivery_jobs` + scheduler),
 - úspěch je HTTP `2xx`,
 - retryable HTTP stavy:
   - `408`, `425`, `429`, `500`, `502`, `503`, `504`,
@@ -188,7 +191,7 @@ Konfigurační sekce: `app.webhooks.dispatcher`.
 | `400 {"error":"invalid_webhook_id"}` | Neplatné UUID v path parametru |
 | `404 {"error":"webhook_not_found"}` | Endpoint neexistuje v tenant scope |
 | `400 {"error":"url_required"}` | Chybí `url` při create |
-| `400 {"error":"invalid_webhook_url"}` | URL není validní `http`/`https` adresa |
+| `400 {"error":"invalid_webhook_url"}` | URL není validní `http`/`https` adresa nebo míří na privátní adresu |
 | `400 {"error":"invalid_webhook_status"}` | Neplatný `status` |
 | `400 {"error":"invalid_webhook_event_type"}` | Neplatná hodnota v `eventTypes` |
 | `400 {"error":"update_required"}` | Aktualizační payload bez efektivní změny |

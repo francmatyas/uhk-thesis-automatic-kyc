@@ -1,5 +1,6 @@
 package com.francmatyas.uhk_thesis_automatic_kyc_api.modules.verification.controller;
 
+import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.audit.service.AuditLogService;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.auth.model.User;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.check_result.dto.CheckResultResponse;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.check_result.service.CheckResultService;
@@ -10,6 +11,7 @@ import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.verification.model.V
 import com.francmatyas.uhk_thesis_automatic_kyc_api.modules.verification.service.VerificationService;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.security.RequireActiveTenant;
 import com.francmatyas.uhk_thesis_automatic_kyc_api.security.TenantContext;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +35,7 @@ public class TenantVerificationController {
     private final VerificationService verificationService;
     private final CheckResultService checkResultService;
     private final RiskScoreService riskScoreService;
+    private final AuditLogService auditLogService;
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('PERM_tenant.verifications:read')")
@@ -52,11 +55,22 @@ public class TenantVerificationController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('PERM_tenant.verifications:read')")
     public ResponseEntity<?> get(@AuthenticationPrincipal User currentUser, @PathVariable UUID id,
-                                 Authentication authentication) {
+                                 Authentication authentication, HttpServletRequest httpReq) {
         if (currentUser == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         try {
             Verification v = verificationService.findByIdAndTenant(id, TenantContext.getTenantId());
             boolean canReadIdentity = hasAuthority(authentication, "PERM_tenant.client-identities:read");
+            if (canReadIdentity && v.getClientIdentity() != null) {
+                try {
+                    String ip = httpReq.getHeader("CF-Connecting-IP");
+                    if (ip == null || ip.isBlank()) ip = httpReq.getRemoteAddr();
+                    auditLogService.logUserAction(
+                            currentUser.getId(), TenantContext.getTenantId(),
+                            "CLIENT_IDENTITY", v.getClientIdentity().getId().toString(),
+                            "IDENTITY_READ", null, null, null,
+                            ip, httpReq.getHeader("User-Agent"), null, null);
+                } catch (Exception ignored) {}
+            }
             return ResponseEntity.ok(verificationService.toDetailResponse(v, canReadIdentity));
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));

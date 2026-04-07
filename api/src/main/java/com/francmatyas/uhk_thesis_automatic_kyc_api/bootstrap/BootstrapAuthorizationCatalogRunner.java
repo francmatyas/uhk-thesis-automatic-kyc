@@ -137,8 +137,6 @@ public class BootstrapAuthorizationCatalogRunner implements ApplicationRunner {
                 new PermissionSeed("tenant.audit-logs", "read", "View tenant audit logs"),
                 // KYC oblast poskytovatele
                 new PermissionSeed("provider.verifications", "read", "View KYC verifications across tenants"),
-                new PermissionSeed("provider.verifications", "review", "Approve or reject KYC verifications requiring manual review"),
-                new PermissionSeed("provider.client-identities", "read", "View KYC client identities across tenants"),
                 new PermissionSeed("provider.journey-templates", "read", "View KYC journey templates across tenants"),
                 new PermissionSeed("provider.journey-templates", "create", "Create KYC journey templates across tenants"),
                 new PermissionSeed("provider.journey-templates", "update", "Update KYC journey templates across tenants"),
@@ -175,8 +173,7 @@ public class BootstrapAuthorizationCatalogRunner implements ApplicationRunner {
                         "provider.roles:read", "provider.roles:create", "provider.roles:update", "provider.roles:delete",
                         "provider.permissions:read",
                         "provider.audit-logs:read",
-                        "provider.verifications:read", "provider.verifications:review",
-                        "provider.client-identities:read",
+                        "provider.verifications:read",
                         "provider.journey-templates:read", "provider.journey-templates:create", "provider.journey-templates:update", "provider.journey-templates:delete"
                 )),
                 new RoleGrantSeed("ADMIN", RoleScope.PROVIDER, List.of(
@@ -185,8 +182,7 @@ public class BootstrapAuthorizationCatalogRunner implements ApplicationRunner {
                         "provider.roles:read", "provider.roles:create", "provider.roles:update", "provider.roles:delete",
                         "provider.permissions:read",
                         "provider.audit-logs:read",
-                        "provider.verifications:read", "provider.verifications:review",
-                        "provider.client-identities:read",
+                        "provider.verifications:read",
                         "provider.journey-templates:read", "provider.journey-templates:create", "provider.journey-templates:update", "provider.journey-templates:delete"
                 )),
                 new RoleGrantSeed("SUPPORT", RoleScope.PROVIDER, List.of(

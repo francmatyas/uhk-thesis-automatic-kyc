@@ -97,23 +97,36 @@ Volitelně lze poslat:
 - `X-Tenant-Id: <tenant-uuid>`
 
 Pravidla:
-- pokud je `X-Tenant-Id` uvedeno a neodpovídá tenantovi klíče, požadavek je odmítnut,
+- pokud je `X-Tenant-Id` uvedeno a neodpovídá tenantovi klíče, požadavek je odmítnut (`403 tenant_mismatch_for_api_key`),
 - pokud chybí jedna z dvojice hlaviček klíče, požadavek je odmítnut,
 - `lastUsedAt` se aktualizuje při úspěšné autentizaci.
 
-Příklad volání:
+## 5. Aktuálně dostupný API-key endpoint
+API-key autentizace je blokována pro cesty `/auth/**` a `/users/**`.
+
+Mimo to API klíč může volat pouze endpointy označené anotací `@ApiKeyAccessible`.
+Aktuálně je takto dostupný endpoint:
+- `POST /integration/verifications`
+
+Příklad:
 
 ```bash
-curl -X GET 'http://localhost:8080/market-tickers?symbol=BTCUSD&timeframe=5m' \
+curl -X POST 'http://localhost:8080/integration/verifications' \
+  -H 'Content-Type: application/json' \
   -H 'X-API-Key: pk_...' \
-  -H 'X-API-Secret: sk_...'
+  -H 'X-API-Secret: sk_...' \
+  -d '{
+    "journeyTemplateId": "11111111-2222-3333-4444-555555555555",
+    "expiresAt": "2026-04-07T18:00:00Z",
+    "externalReference": "customer-123"
+  }'
 ```
 
-## 5. Omezení přístupu při API-key autentizaci
-- API-key autentizace je blokována pro cesty `/auth/**` a `/users/**`.
-- API klíč může volat pouze endpointy označené anotací `@ApiKeyAccessible`.
-- Aktuálně je takto dostupný endpoint:
-  - `GET /market-tickers`
+Typická úspěšná odpověď (`201`):
+- `id`
+- `verificationUrl`
+- `status`
+- `expiresAt`
 
 ## 6. CSRF chování
 Požadavky autentizované API klíčem mohou obejít CSRF kontrolu, pokud jsou splněny obě podmínky:
@@ -126,6 +139,8 @@ Požadavky autentizované API klíčem mohou obejít CSRF kontrolu, pokud jsou s
 | `401 {"error":"unauthorized","reason":"invalid_api_key_credentials"}` | Chybějící/nesprávné hlavičky, neplatný secret, neexistující nebo neaktivní klíč |
 | `403 {"error":"forbidden","reason":"api_key_forbidden_path"}` | Pokus o použití API klíče na `/auth/**` nebo `/users/**` |
 | `403 {"error":"forbidden","reason":"api_key_endpoint_not_enabled"}` | Endpoint není označen jako `@ApiKeyAccessible` |
+| `403 {"error":"forbidden","reason":"api_key_not_supported_for_endpoint"}` | Endpoint očekává `@AuthenticationPrincipal User` |
+| `403 {"error":"forbidden","reason":"api_key_principal_type_unsupported"}` | `@AuthenticationPrincipal` je nepodporovaného typu |
 | `403 {"error":"forbidden","reason":"tenant_mismatch_for_api_key"}` | `X-Tenant-Id` neodpovídá tenantovi klíče |
 | `400 {"error":"invalid_api_key_id"}` | Neplatné UUID v path parametru |
 | `404 {"error":"api_key_not_found"}` | Klíč nebyl nalezen v aktuálním tenant kontextu |

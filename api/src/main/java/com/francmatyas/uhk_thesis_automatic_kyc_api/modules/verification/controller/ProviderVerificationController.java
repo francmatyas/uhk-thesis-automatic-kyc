@@ -14,11 +14,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.security.core.Authentication;
-
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @RestController
@@ -47,12 +44,10 @@ public class ProviderVerificationController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('PERM_provider.verifications:read')")
-    public ResponseEntity<?> get(@AuthenticationPrincipal User currentUser, @PathVariable UUID id,
-                                 Authentication authentication) {
+    public ResponseEntity<?> get(@AuthenticationPrincipal User currentUser, @PathVariable UUID id) {
         if (currentUser == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        boolean canReadIdentity = hasAuthority(authentication, "PERM_provider.client-identities:read");
         return verificationRepository.findById(id)
-                .<ResponseEntity<?>>map(v -> ResponseEntity.ok(verificationService.toDetailResponse(v, canReadIdentity)))
+                .<ResponseEntity<?>>map(v -> ResponseEntity.ok(verificationService.toDetailResponse(v, false)))
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "not_found")));
     }
 
@@ -68,32 +63,6 @@ public class ProviderVerificationController {
         return ResponseEntity.ok(results);
     }
 
-    @PostMapping("/{id}/approve")
-    @PreAuthorize("hasAnyAuthority('PERM_provider.verifications:review')")
-    public ResponseEntity<?> approve(@AuthenticationPrincipal User currentUser, @PathVariable UUID id) {
-        if (currentUser == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        try {
-            return ResponseEntity.ok(verificationService.approveReview(id, null, currentUser.getId()));
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
-        }
-    }
-
-    @PostMapping("/{id}/reject")
-    @PreAuthorize("hasAnyAuthority('PERM_provider.verifications:review')")
-    public ResponseEntity<?> reject(@AuthenticationPrincipal User currentUser, @PathVariable UUID id) {
-        if (currentUser == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        try {
-            return ResponseEntity.ok(verificationService.rejectReview(id, null, currentUser.getId()));
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
-        }
-    }
-
     @GetMapping("/{id}/risk-score")
     @PreAuthorize("hasAnyAuthority('PERM_provider.verifications:read')")
     public ResponseEntity<?> riskScore(@AuthenticationPrincipal User currentUser, @PathVariable UUID id) {
@@ -107,8 +76,4 @@ public class ProviderVerificationController {
                         .body(Map.of("error", "risk_score_not_yet_available")));
     }
 
-    private static boolean hasAuthority(Authentication auth, String authority) {
-        return auth != null && auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals(authority));
-    }
 }

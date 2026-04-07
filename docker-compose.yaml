@@ -107,6 +107,105 @@ services:
     networks:
       - automatic_kyc_network
 
+  traefik:
+    image: traefik:v3.3
+    container_name: automatic_kyc_traefik
+    restart: unless-stopped
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=automatic_kyc_network"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8088:8080"   # Traefik dashboard
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - automatic_kyc_network
+
+  api:
+    build:
+      context: ./api
+    container_name: automatic_kyc_api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-automatic_kyc_db}
+      DATABASE_USERNAME: ${POSTGRES_USER:-automatic_kyc}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-automatic_kyc_password}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5671
+      RABBITMQ_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
+      RABBITMQ_SSL_ENABLED: "true"
+      RABBITMQ_SSL_VERIFY_HOSTNAME: "true"
+      RABBITMQ_TRUSTSTORE_PATH: /certs/api-truststore.p12
+      RABBITMQ_TRUSTSTORE_PASSWORD: ${RABBITMQ_TRUSTSTORE_PASSWORD:-}
+      RABBITMQ_TRUSTSTORE_TYPE: PKCS12
+      RABBITMQ_KEYSTORE_PATH: /certs/api-keystore.p12
+      RABBITMQ_KEYSTORE_PASSWORD: ${RABBITMQ_KEYSTORE_PASSWORD:-}
+      RABBITMQ_KEYSTORE_TYPE: PKCS12
+      S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minioadmin}
+      S3_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      S3_BUCKET: ${S3_BUCKET:-automatic-kyc-localhost}
+      S3_ENDPOINT: http://minio:9000
+      S3_WORKER_PRESIGN_ENDPOINT: ${S3_WORKER_PRESIGN_ENDPOINT:-http://localhost:9000}
+      S3_PUBLIC_BASE_URL: ${S3_PUBLIC_BASE_URL:-http://localhost:9000/automatic-kyc-localhost}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-}
+      JWT_ISSUER: ${JWT_ISSUER:-automatic-kyc}
+      KYC_FLOW_BASE_URL: ${KYC_FLOW_BASE_URL:-http://verify.localhost/v}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://admin.localhost,http://verify.localhost}
+      APP_ENV: ${APP_ENV:-dev}
+      APP_ENCRYPTION_MASTER_KEY: ${APP_ENCRYPTION_MASTER_KEY:-}
+    volumes:
+      - ./ops/api/certs:/certs:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`api.localhost`)"
+      - "traefik.http.routers.api.entrypoints=web"
+      - "traefik.http.services.api.loadbalancer.server.port=8080"
+    networks:
+      - automatic_kyc_network
+
+  admin:
+    build:
+      context: ./admin
+      args:
+        VITE_API_URL: ${VITE_ADMIN_API_URL:-http://api.localhost}
+        VITE_WS_URL: ${VITE_ADMIN_WS_URL:-ws://api.localhost}
+    container_name: automatic_kyc_admin
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.admin.rule=Host(`admin.localhost`)"
+      - "traefik.http.routers.admin.entrypoints=web"
+      - "traefik.http.services.admin.loadbalancer.server.port=80"
+    networks:
+      - automatic_kyc_network
+
+  verify:
+    build:
+      context: ./verify
+      args:
+        VITE_API_BASE_URL: ${VITE_VERIFY_API_BASE_URL:-http://api.localhost}
+    container_name: automatic_kyc_verify
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.verify.rule=Host(`verify.localhost`)"
+      - "traefik.http.routers.verify.entrypoints=web"
+      - "traefik.http.services.verify.loadbalancer.server.port=80"
+    networks:
+      - automatic_kyc_network
+
 volumes:
   automatic_kyc_postgres_data:
   automatic_kyc_rabbitmq_data:

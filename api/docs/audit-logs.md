@@ -98,7 +98,13 @@ Audit zápisy jsou aktuálně generovány v následujících controllerech:
 | `TenantMeController` | `TENANT_UPDATE` | Tenant self-update |
 | `TenantSwitchController` | `SWITCH_ACTIVE_TENANT` | Obsahuje `oldValue/newValue` a metadata switch operace |
 | `RoleController` | `ROLE_CREATE`, `ROLE_UPDATE`, `ROLE_DELETE` | Provider role management |
-| `PermissionController` | `PERMISSION_CREATE`, `PERMISSION_UPDATE`, `PERMISSION_DELETE` | Provider permission management |
+| `PermissionController` | `PERMISSION_*` | Write endpointy jsou aktuálně vypnuté |
+| `IntegrationCredentialsController` | `API_KEY_*`, `WEBHOOK_*` | Správa integračních credentialů |
+| `TenantJourneyTemplateController` | `JOURNEY_TEMPLATE_*` | Tenant správa journey template |
+| `UserMeController`, `UserController`, `UserProviderController` | `USER_*` | User profil/správa |
+| `IntegrationVerificationController` | `VERIFICATION_CREATE` | API-key vytvoření verifikace |
+| `FlowController` | `*_OTP_*`, `PERSONAL_INFO_SAVED`, `VERIFICATION_FINALIZE` | Audit kroků veřejného KYC flow |
+| `VerificationService`, `KycResultHandler`, `VerificationStepService` | `VERIFICATION_*` status akce | Servisní audit automatických přechodů a výsledků |
 
 ## 7. Čtení audit logů (API)
 

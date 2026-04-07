@@ -5,7 +5,7 @@ Dokument popisuje model autorizace založený na RBAC, tedy na přiřazení:
 - oprávnění k rolím,
 - rolí k uživatelům v konkrétním kontextu (provider nebo tenant).
 
-## 2. Konceptuální model
+## 2. Konceptuální model (aktuální runtime)
 
 ```text
 Permission
@@ -18,6 +18,10 @@ UserTenantRole (user + role + tenant?)
     ↓
 User
 ```
+
+Poznámka:
+- runtime výpočet oprávnění používá `user_tenant_roles`,
+- tabulka `user_roles` je v modelu stále přítomná, ale není zdrojem policy snapshotu.
 
 ## 3. Oprávnění (`Permission`)
 Oprávnění je definováno dvojicí `(resource, action)`.
@@ -36,12 +40,22 @@ Kombinace `(resource, action)` je unikátní.
 | `provider.tenants` | read, create, update, delete |
 | `provider.users` | read, create, update, delete |
 | `provider.roles` | read, create, update, delete |
-| `provider.permissions` | read, create, update, delete |
+| `provider.permissions` | read |
+| `provider.audit-logs` | read |
+| `provider.verifications` | read |
+| `provider.journey-templates` | read, create, update, delete |
 | `tenant.tenants` | read, update |
 | `tenant.members` | read, create, update, delete |
 | `tenant.roles` | read, update |
 | `tenant.api-keys` | read, create, update, delete |
 | `tenant.webhooks` | read, create, update, delete |
+| `tenant.audit-logs` | read |
+| `tenant.journey-templates` | read, create, update, delete |
+| `tenant.client-identities` | read |
+| `tenant.verifications` | read, review |
+
+Poznámka:
+- manuální review verifikací (`approve/reject`) je aktuálně svázané s tenant oprávněním `tenant.verifications:review`.
 
 ## 4. Role (`Role`)
 Role jsou definovány jménem a rozsahem (`scope`).
@@ -58,9 +72,11 @@ Role jsou definovány jménem a rozsahem (`scope`).
 |---|---|---|---|
 | OWNER | PROVIDER | 1200 | `provider.*` |
 | ADMIN | PROVIDER | 1000 | `provider.*` |
+| SUPPORT | PROVIDER | 500 | Vybraná read oprávnění |
 | OWNER | TENANT | 1000 | `tenant.*` |
-| ADMIN | TENANT | 900 | Správa tenanta, členů, API klíčů a webhooků |
-| OPERATOR | TENANT | 500 | Typicky čtecí oprávnění |
+| ADMIN | TENANT | 900 | Správa tenanta, členů a KYC domén |
+| OPERATOR | TENANT | 500 | Práce s KYC (bez plné správy tenanta) |
+| VIEWER | TENANT | 100 | Read-only KYC přístup |
 
 ## 5. Přiřazení rolí uživatelům (`UserTenantRole`)
 Tabulka `user_tenant_roles` určuje, v jakém kontextu role platí.
@@ -84,9 +100,9 @@ Výsledný snapshot obsahuje:
 
 Chování podle kontextu:
 - provider bez aktivního tenanta:
-  - provider role.
+  - provider role (`tenant_id = NULL`).
 - provider s aktivním tenantem:
-  - provider role + tenant role pro aktivního tenanta.
+  - tenant role pro aktivního tenanta (provider scope se v tomto režimu nepromítá).
 - tenant uživatel s aktivním tenantem:
   - tenant role pro aktivního tenanta.
 - tenant uživatel bez aktivního tenanta:
@@ -118,14 +134,18 @@ public ResponseEntity<?> apiKeyEndpoint() { ... }
 ## 8. Administrace RBAC přes API
 
 ### 8.1 Oprávnění
-- `GET /auth/permissions`
-- `POST /auth/permissions`
-- `PUT /auth/permissions/{id}`
+- `GET /provider/permissions`
+- `GET /provider/permissions/{id}`
+
+Poznámka:
+- write endpointy pro `permissions` jsou aktuálně v kontroleru vypnuté.
 
 ### 8.2 Role
-- `GET /auth/roles`
-- `POST /auth/roles`
-- `PUT /auth/roles/{id}`
+- `GET /provider/roles`
+- `GET /provider/roles/{id}`
+- `POST /provider/roles`
+- `PUT /provider/roles/{id}`
+- `DELETE /provider/roles/{id}`
 
 Kontrola přístupu je vynucena přes `PERM_provider.*` a vybraná `PERM_tenant.roles:*`.
 

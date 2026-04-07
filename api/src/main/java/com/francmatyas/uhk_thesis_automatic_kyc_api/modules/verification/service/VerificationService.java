@@ -289,13 +289,9 @@ public class VerificationService {
         String journeyTemplateName = v.getJourneyTemplate() != null
                 ? v.getJourneyTemplate().getName()
                 : null;
-        ClientIdentity ci = v.getClientIdentity();
-        String clientName = ci != null
-                ? buildFullName(ci.getFirstName(), ci.getLastName())
-                : "—";
         return VerificationListDTO.builder()
                 .id(v.getId().toString())
-                .clientName(clientName)
+                .clientName(v.getId().toString())
                 .status(v.getStatus() != null ? v.getStatus().name() : null)
                 .tenantId(v.getTenantId() != null ? v.getTenantId().toString() : null)
                 .tenantName(tenantName)

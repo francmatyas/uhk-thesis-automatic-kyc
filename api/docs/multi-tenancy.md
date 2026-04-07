@@ -43,6 +43,7 @@ Toto rozlišení probíhá dvakrát:
 Pro API klíč:
 - tenant je pevně svázán s klíčem,
 - nesoulad s `X-Tenant-Id` vede na `403 tenant_mismatch_for_api_key`.
+- neplatná hodnota `X-Tenant-Id` (ne-UUID) se ignoruje a použije se tenant z API klíče.
 
 ## 5. Tenant izolace dat
 
@@ -59,11 +60,18 @@ Entity používají `@SQLRestriction("(is_deleted = false OR is_deleted IS NULL)
 ## 6. Vazba na RBAC
 `PolicyService.buildForUser()` čte `TenantContext` a skládá snapshot oprávnění podle aktivního kontextu:
 - provider bez aktivního tenanta: pouze provider role,
-- provider s tenantem: provider role + tenant role pro aktivního tenanta,
+- provider s tenantem: pouze tenant role pro aktivního tenanta,
 - tenant uživatel s tenantem: tenant role,
 - tenant uživatel bez tenanta: prázdný snapshot.
 
 Snapshot je sestavován při každém požadavku z aktuálního stavu databáze.
+
+## 6.1 RequireActiveTenant kontrakt
+Interceptor `RequireActiveTenantInterceptor` vynucuje tenant kontext pouze tam, kde je endpoint označen `@RequireActiveTenant`.
+
+Chování:
+- provider uživatel může pokračovat i bez aktivního tenanta,
+- non-provider uživatel bez aktivního tenanta dostane `400 tenant_required`.
 
 ## 7. Ochrana `/provider/**`
 `ProviderOnlyPathFilter` odmítne přístup na `/provider/**` pokud:

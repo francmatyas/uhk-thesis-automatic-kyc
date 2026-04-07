@@ -29,7 +29,7 @@ Autentizace je vzájemně exkluzivní: pokud `ApiKeyAuthFilter` nastaví `Securi
 Endpoint `POST /auth/login` přijímá payload `{ email, password, rememberMe }`.
 
 Průběh:
-1. `AuthenticationManager` ověří přihlašovací údaje oproti BCrypt hashovanému heslu.
+1. `AuthenticationManager` ověří přihlašovací údaje.
 2. `PolicyService` sestaví aktuální `PolicySnapshot` (role a oprávnění).
 3. Vytvoří se podepsaný JWT (HS256) s claims:
    - `sub` (UUID uživatele),
@@ -38,7 +38,7 @@ Průběh:
    - `roles`, `permissions`, `policyVersion`,
    - `email`, `name`,
    - `tenantId` (pokud byl při přihlášení vybrán tenant).
-4. JWT je uložen do cookie `AUTH_TOKEN` (`HttpOnly; Secure; SameSite=Lax`).
+4. JWT je uložen do cookie `AUTH_TOKEN` (`HttpOnly`, `SameSite=Lax`, `Secure` pouze v produkčním režimu).
 5. Vznikne záznam `UserSession` obsahující `jti`, expiraci, IP a informace o zařízení.
 
 TTL relace je řízeno konfigurací:
@@ -86,6 +86,9 @@ Filtr `ApiKeyAuthFilter`:
 API klíč má přístup jen k endpointům označeným `@ApiKeyAccessible`.
 Vynucení probíhá v `ApiKeyAccessInterceptor`.
 
+Aktuálně je API klíčem dostupný integrační endpoint:
+- `POST /integration/verifications`
+
 ## 5. CSRF ochrana
 Pro uživatelské relace je aktivní cookie-based CSRF:
 - cookie: `XSRF-TOKEN`,
@@ -98,6 +101,9 @@ CSRF validace se nepoužije pro:
 - veřejné cesty `/auth/**`,
 - požadavky s API klíčem bez JWT cookie.
 
+Poznámka:
+- CSRF cookie je nastavena se `SameSite=Strict`.
+
 ## 6. Veřejné endpointy bez autentizace
 
 ```text
@@ -105,8 +111,11 @@ GET  /auth/csrf
 POST /auth/login
 POST /auth/register
 GET  /health
+ALL  /flow/**
 GET  /translations/**
 GET  /images/**
+ALL  /error
+OPTIONS /** (preflight)
 ```
 
 ## 7. Typy principálů v SecurityContext
@@ -124,7 +133,7 @@ Kontrolery používající `@AuthenticationPrincipal` musí počítat s rozdíln
 
 Politika:
 - 10 požadavků / 10 minut / IP adresa,
-- při překročení: `429 Too Many Requests` a `Retry-After: 600`.
+- při překročení: `429 Too Many Requests`, `Retry-After: 600` a tělo `{"error":"too_many_requests"}`.
 
 ## 9. Související dokumentace
 - [API klíče](./api-keys.md)

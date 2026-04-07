@@ -14,8 +14,7 @@ public record CheckResultResponse(
         UUID verificationId,
         CheckType checkType,
         CheckResultStatus status,
-        BigDecimal score,
-        JsonNode detailsJson
+        BigDecimal score
 ) {
     public static CheckResultResponse from(CheckResult r) {
         return new CheckResultResponse(
@@ -23,8 +22,7 @@ public record CheckResultResponse(
                 r.getVerification() != null ? r.getVerification().getId() : null,
                 r.getCheckType(),
                 r.getStatus(),
-                r.getScore(),
-                r.getDetailsJson()
+                r.getScore()
         );
     }
 }

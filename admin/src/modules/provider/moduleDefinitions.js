@@ -685,7 +685,7 @@ export const providerModuleDefinitions = {
       idParam: "verificationId",
       breadcrumb: {
         key: "verifications",
-        labelField: "clientName",
+        labelField: "id",
       },
       defaultValues: {},
       showDelete: false,

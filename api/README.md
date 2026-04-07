@@ -1,5 +1,7 @@
 # Dokumentace projektu Automatic KYC API
 
+Aktuální dokumentace odpovídá stavu API v repozitáři (`spring-boot 3.5.6`, `java 25`, `version 0.0.1-SNAPSHOT`).
+
 ## Struktura
 - [Autentizace](docs/authentication.md)
 - [RBAC](docs/rbac.md)
