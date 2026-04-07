@@ -4,3 +4,5 @@
 !/worker/certs/.gitkeep
 /api/certs/*
 !/api/certs/.gitkeep
+/traefik/certs/*
+!/traefik/certs/.gitkeep
