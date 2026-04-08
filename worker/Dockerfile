@@ -4,6 +4,8 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
+    libgles2 \
+    libegl1 \
     libglib2.0-0 \
     tesseract-ocr \
     tesseract-ocr-osd \
@@ -14,4 +16,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "-m", "src.main"]
+CMD ["sh", "-c", "if [ ! -f /app/data/aml.db ] && [ -f /app/data/peps.csv ] && [ -f /app/data/sanctions.csv ]; then echo 'Building AML DB...'; python -m src.aml.build_db; fi; exec python -m src.main"]

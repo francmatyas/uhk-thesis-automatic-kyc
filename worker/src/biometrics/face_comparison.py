@@ -69,6 +69,7 @@ def _download(url: str, dest: Path) -> None:
 
 
 def _ensure_models() -> tuple[str, str]:
+    _MODELS_DIR.mkdir(parents=True, exist_ok=True)
     if not _YUNET_PATH.exists():
         _download(_YUNET_URL, _YUNET_PATH)
     if not _SFACE_PATH.exists():

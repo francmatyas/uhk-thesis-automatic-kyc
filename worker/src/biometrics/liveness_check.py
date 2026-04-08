@@ -45,6 +45,7 @@ _MODEL_PATH = Path(__file__).parent.parent.parent / "models" / "face_landmarker.
 
 def _ensure_model() -> str:
     """Stáhne model FaceLandmarker, pokud ještě není v lokální cache."""
+    _MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
     if not _MODEL_PATH.exists():
         logger.info("Downloading MediaPipe FaceLandmarker model to %s …", _MODEL_PATH)
         print(f"Downloading face_landmarker.task model to {_MODEL_PATH} …")

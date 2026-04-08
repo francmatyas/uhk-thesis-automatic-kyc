@@ -396,7 +396,14 @@ class WorkerRuntime:
                 hits = screener.scan(full_name, dob)
             return [dataclasses.asdict(h) for h in hits]
 
-        hits = await loop.run_in_executor(None, _run_scan)
+        try:
+            hits = await loop.run_in_executor(None, _run_scan)
+        except WorkerError as exc:
+            if exc.code == "AML_DB_NOT_FOUND":
+                logger.warning("AML database not found at %s; returning empty AML result", db_path)
+                hits = []
+            else:
+                raise
 
         on_progress(90, "done")
         return {"hits": hits, "hitCount": len(hits)}
