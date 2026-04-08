@@ -6,6 +6,7 @@ const BASE_PATH =
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? "",
   timeout: 10000,
+  withCredentials: true,
   xsrfCookieName: "", // vypne vestavěný XSRF v axiosu - čte syrové UUID z cookie, které Spring odmítne
   xsrfHeaderName: "", // maskovaný token z odpovědi /auth/csrf nastavujeme ručně
 });

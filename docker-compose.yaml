@@ -66,11 +66,11 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.minio.rule=Host(`${MINIO_HOST:-minio.localhost}`)"
-      - "traefik.http.routers.minio.entrypoints=websecure"
+      - "traefik.http.routers.minio.entrypoints=web"
       - "traefik.http.routers.minio.service=minio"
       - "traefik.http.services.minio.loadbalancer.server.port=9000"
       - "traefik.http.routers.minio-console.rule=Host(`${MINIO_CONSOLE_HOST:-minio-console.localhost}`)"
-      - "traefik.http.routers.minio-console.entrypoints=websecure"
+      - "traefik.http.routers.minio-console.entrypoints=web"
       - "traefik.http.routers.minio-console.service=minio-console"
       - "traefik.http.services.minio-console.loadbalancer.server.port=9001"
     networks:
@@ -118,7 +118,7 @@ services:
       - automatic_kyc_network
 
   traefik:
-    image: traefik:v3.3
+    image: traefik:v3.6.1
     container_name: automatic_kyc_traefik
     restart: unless-stopped
     command:
@@ -127,16 +127,13 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.network=automatic_kyc_network"
       - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--providers.file.filename=/etc/traefik/dynamic.yml"
+      - "--accesslog=true"
+      - "--log.level=INFO"
     ports:
       - "80:80"
-      - "443:443"
       - "8088:8080"   # Traefik dashboard
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./ops/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro"
-      - "./ops/traefik/certs:/certs:ro"
     networks:
       - automatic_kyc_network
 
@@ -162,16 +159,16 @@ services:
       RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
       RABBITMQ_SSL_ENABLED: "true"
       RABBITMQ_SSL_VERIFY_HOSTNAME: "true"
-      RABBITMQ_TRUSTSTORE_PATH: /certs/api-truststore.p12
+      RABBITMQ_TRUSTSTORE_PATH: file:/certs/api-truststore.p12
       RABBITMQ_TRUSTSTORE_PASSWORD: ${RABBITMQ_TRUSTSTORE_PASSWORD:-}
       RABBITMQ_TRUSTSTORE_TYPE: PKCS12
-      RABBITMQ_KEYSTORE_PATH: /certs/api-keystore.p12
+      RABBITMQ_KEYSTORE_PATH: file:/certs/api-keystore.p12
       RABBITMQ_KEYSTORE_PASSWORD: ${RABBITMQ_KEYSTORE_PASSWORD:-}
       RABBITMQ_KEYSTORE_TYPE: PKCS12
       S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minioadmin}
       S3_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
       S3_BUCKET: ${S3_BUCKET:-automatic-kyc-localhost}
-      S3_ENDPOINT: http://minio:9000
+      S3_ENDPOINT: ${S3_ENDPOINT:-http://localhost:9000}
       S3_WORKER_PRESIGN_ENDPOINT: ${S3_WORKER_PRESIGN_ENDPOINT:-http://localhost:9000}
       S3_PUBLIC_BASE_URL: ${S3_PUBLIC_BASE_URL:-http://localhost:9000/automatic-kyc-localhost}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-}
@@ -180,12 +177,18 @@ services:
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://admin.localhost,http://verify.localhost}
       APP_ENV: ${APP_ENV:-dev}
       APP_ENCRYPTION_MASTER_KEY: ${APP_ENCRYPTION_MASTER_KEY:-}
+      APP_BOOTSTRAP_ENABLED: ${APP_BOOTSTRAP_ENABLED:-false}
+      APP_BOOTSTRAP_ADMIN_EMAIL: ${APP_BOOTSTRAP_ADMIN_EMAIL:-}
+      APP_BOOTSTRAP_ADMIN_PASSWORD: ${APP_BOOTSTRAP_ADMIN_PASSWORD:-}
+      APP_BOOTSTRAP_AUTHZ_ENABLED: ${APP_BOOTSTRAP_AUTHZ_ENABLED:-true}
+      APP_BOOTSTRAP_TEST_TENANT_SLUG: ${APP_BOOTSTRAP_TEST_TENANT_SLUG:-test-tenant}
+      APP_BOOTSTRAP_TEST_TENANT_NAME: ${APP_BOOTSTRAP_TEST_TENANT_NAME:-Test Tenant}
     volumes:
       - ./ops/api/certs:/certs:ro
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`${API_HOST:-api.localhost}`)"
-      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.entrypoints=web"
       - "traefik.http.services.api.loadbalancer.server.port=8080"
     networks:
       - automatic_kyc_network
@@ -201,7 +204,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.admin.rule=Host(`${ADMIN_HOST:-admin.localhost}`)"
-      - "traefik.http.routers.admin.entrypoints=websecure"
+      - "traefik.http.routers.admin.entrypoints=web"
       - "traefik.http.services.admin.loadbalancer.server.port=80"
     networks:
       - automatic_kyc_network
@@ -216,7 +219,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.verify.rule=Host(`${VERIFY_HOST:-verify.localhost}`)"
-      - "traefik.http.routers.verify.entrypoints=websecure"
+      - "traefik.http.routers.verify.entrypoints=web"
       - "traefik.http.services.verify.loadbalancer.server.port=80"
     networks:
       - automatic_kyc_network
@@ -229,3 +232,4 @@ volumes:
 
 networks:
   automatic_kyc_network:
+    name: automatic_kyc_network
