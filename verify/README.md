@@ -1,18 +1,38 @@
-# React + Vite
+# Dokumentace Verify aplikace
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Klientská aplikace `uhk-thesis-automatic-kyc-verify` je frontend pro koncové uživatele, kteří dokončují KYC ověření přes jednorázový token (`/v/:token`).
 
-Currently, two official plugins are available:
+## Účel a rozsah
+- načtení verifikačního flow z API,
+- průchod povinnými/volitelnými kroky podle konfigurace journey template,
+- sběr a upload podkladů (doklad, liveness),
+- finalizace flow po dokončení všech povinných kroků.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Rozcestník dokumentace
+- [Architektura a řízení flow](docs/architektura-flow.md)
+- [API kontrakt a integrace](docs/api-kontrakt.md)
 
-## React Compiler
+## Lokální spuštění
+```bash
+npm ci
+npm run dev
+```
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+Build:
+```bash
+npm run build
+npm run preview
+```
 
-Note: This will impact Vite dev & build performances.
+## Konfigurace
+Hlavní proměnné:
+- `VITE_API_BASE_URL`: base URL API (v produkci/build kontejneru).
+- `VITE_API_BASE_PATH`: cesta flow API, default `/flow/verify/v1`.
+- `VITE_FACE_API_MODELS_URL`: cesta k `face-api.js` modelům, default `/models/face-api`.
+- `VITE_API_URL`: dev proxy target pro `/flow` a `/auth` (viz `vite.config.js`).
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Hlavní technické body
+- React Router (`/`, `/v/:token`) a React Query pro načítání flow a mutace kroků.
+- i18n přes `i18next` (`cs`, `en`) s YAML překlady v `public/locales`.
+- Dokumenty a liveness používají presigned upload do objektového úložiště.
+- Liveness obsahuje lokální detekci obličeje (`face-api.js`) s fallbackem na ruční snímek.

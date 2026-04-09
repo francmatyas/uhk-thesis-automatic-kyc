@@ -1,33 +1,33 @@
-TLS/mTLS files expected by `docker-compose.yaml`:
+TLS/mTLS soubory očekávané v `docker-compose.yaml`:
 
-- RabbitMQ server-side certs (mounted to `/etc/rabbitmq/certs`):
+- RabbitMQ serverové certifikáty (mount do `/etc/rabbitmq/certs`):
   - `ops/rabbitmq/certs/ca.crt`
   - `ops/rabbitmq/certs/server.crt`
   - `ops/rabbitmq/certs/server.key`
 
-- Worker client-side certs (mounted to `/certs`):
+- Worker klientské certifikáty (mount do `/certs`):
   - `ops/worker/certs/ca.crt`
   - `ops/worker/certs/client.crt`
   - `ops/worker/certs/client.key`
 
-- API Java keystores (for Spring AMQP SSL/mTLS):
+- API Java keystores (pro Spring AMQP SSL/mTLS):
   - `ops/api/certs/api-truststore.p12`
   - `ops/api/certs/api-keystore.p12`
 
-Notes:
-- `server.crt` must have SAN/DNS for `rabbitmq` (the Docker service hostname).
-- Keep private keys out of git.
+Poznámky:
+- `server.crt` musí obsahovat SAN/DNS pro `rabbitmq` (hostname Docker služby).
+- Privátní klíče nikdy neukládejte do gitu.
 
-## Dev setup: generate TLS/mTLS certificates
+## Dev setup: generování TLS/mTLS certifikátů
 
-Run from repository root:
+Spusťte z kořene repozitáře:
 
 ```bash
 mkdir -p ops/rabbitmq/certs ops/worker/certs ops/api/certs .tmp-certs
 cd .tmp-certs
 ```
 
-### 1) Create local CA
+### 1) Vytvoření lokální CA
 
 ```bash
 openssl genrsa -out ca.key 4096
@@ -36,9 +36,9 @@ openssl req -x509 -new -nodes -key ca.key -sha256 -days 3650 \
   -out ca.crt
 ```
 
-### 2) Create RabbitMQ server certificate
+### 2) Vytvoření RabbitMQ server certifikátu
 
-`server.crt` must include SAN `DNS:rabbitmq` because workers connect to hostname `rabbitmq` in Docker network.
+`server.crt` musí obsahovat SAN `DNS:rabbitmq`, protože worker se v Docker síti připojuje na hostname `rabbitmq`.
 
 ```bash
 cat > server.cnf <<'EOF'
@@ -69,7 +69,7 @@ openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial \
   -out server.crt -days 825 -sha256 -extensions req_ext -extfile server.cnf
 ```
 
-### 3) Create worker client certificate (mTLS)
+### 3) Vytvoření worker klientského certifikátu (mTLS)
 
 ```bash
 cat > client.cnf <<'EOF'
@@ -95,7 +95,7 @@ openssl x509 -req -in client.csr -CA ca.crt -CAkey ca.key -CAcreateserial \
   -out client.crt -days 825 -sha256 -extensions req_ext -extfile client.cnf
 ```
 
-### 4) Copy files to expected paths
+### 4) Kopie souborů do očekávaných cest
 
 ```bash
 cp ca.crt ../ops/rabbitmq/certs/ca.crt
@@ -107,7 +107,7 @@ cp client.crt ../ops/worker/certs/client.crt
 cp client.key ../ops/worker/certs/client.key
 ```
 
-### 5) Secure keys and clean temporary files
+### 5) Zabezpečení klíčů a úklid dočasných souborů
 
 ```bash
 chmod 600 ../ops/rabbitmq/certs/server.key ../ops/worker/certs/client.key
@@ -115,13 +115,13 @@ cd ..
 rm -rf .tmp-certs
 ```
 
-### 6) Start stack
+### 6) Spuštění stacku
 
 ```bash
 docker compose up -d --build
 ```
 
-Optional check:
+Volitelná kontrola:
 
 ```bash
 docker compose logs -f rabbitmq worker
@@ -129,10 +129,9 @@ docker compose logs -f rabbitmq worker
 
 ## API mTLS setup (Spring Boot)
 
-Spring AMQP SSL expects Java keystore/truststore files. Generate them from the
-same CA/client certs used above.
+Spring AMQP SSL očekává Java keystore/truststore soubory. Vygenerujte je ze stejné CA a klientského certifikátu jako výše.
 
-From repository root:
+Spusťte z kořene repozitáře:
 
 ```bash
 keytool -importcert -noprompt \
@@ -151,7 +150,7 @@ openssl pkcs12 -export \
   -passout pass:changeit
 ```
 
-Set API env vars:
+Nastavte API env proměnné:
 
 ```bash
 RABBITMQ_PORT=5671
