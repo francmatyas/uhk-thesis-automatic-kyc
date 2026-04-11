@@ -84,7 +84,7 @@ function poseMatchesPosition(pose, positionKey) {
   const { yaw, pitch } = pose
 
   switch (positionKey) {
-    case 'front':
+    case 'center':
       // Pitch se záměrně nekontroluje: kamery notebooků bývají nad úrovní očí,
       // takže přirozený pohled rovně už dává nízkou hodnotu pitch.
       return Math.abs(yaw) < 0.20
@@ -108,7 +108,7 @@ const HOLD_FRAMES = 3
 /**
  * @param {object} params
  * @param {React.RefObject<HTMLVideoElement>} params.videoRef
- * @param {string}  params.requiredPosition  - 'front' | 'left' | 'right' | 'up'
+ * @param {string}  params.requiredPosition  - 'center' | 'left' | 'right' | 'up'
  * @param {() => void} params.onCapture      - zavolá se jednou po udržení pozice
  * @param {boolean} params.isActive          - spouští/zastavuje detekční smyčku
  *

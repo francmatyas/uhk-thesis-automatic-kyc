@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { useFaceDetection } from '@/hooks/useFaceDetection'
 
 const POSITIONS = [
-  { key: 'front', Icon: ScanFace },
+  { key: 'center', Icon: ScanFace },
   { key: 'left', Icon: ArrowLeft },
   { key: 'right', Icon: ArrowRight },
   { key: 'up', Icon: ArrowUp },

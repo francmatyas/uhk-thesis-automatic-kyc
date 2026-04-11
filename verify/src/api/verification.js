@@ -201,22 +201,15 @@ export async function uploadIdentityDocument(token, documentType, files) {
 
 // ── Test živosti (liveness) ──────────────────────────────────────────────────
 
-const LIVENESS_POSITION_MAP = {
-  front: "center",
-  left: "left",
-  right: "right",
-  up: "up",
-};
-
-// frames: File[] v pořadí odpovídajícím POSITIONS (front, left, right, up)
+// frames: File[] v pořadí odpovídajícím POSITIONS (center, left, right, up)
 export async function uploadLivenessFrames(token, frames) {
-  const POSITIONS = ["front", "left", "right", "up"];
+  const POSITIONS = ["center", "left", "right", "up"];
   const images = [];
   for (let i = 0; i < frames.length; i++) {
     const file = frames[i];
     if (!file) continue;
     const documentId = await presignAndUpload(token, file, "LIVENESS");
-    images.push({ documentId, position: LIVENESS_POSITION_MAP[POSITIONS[i]] });
+    images.push({ documentId, position: POSITIONS[i] });
   }
 
   const { data } = await api.post(

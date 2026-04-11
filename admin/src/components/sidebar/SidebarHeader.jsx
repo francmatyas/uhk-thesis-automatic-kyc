@@ -21,12 +21,12 @@ export default function SidebarHeader({ className, ...props }) {
           {open && (
             <>
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={null} alt={"ad"} />
-                <AvatarFallback className="rounded-lg">E</AvatarFallback>
+                <AvatarImage src={"/automatic-kyc.png"} alt={"kyc"} />
+                <AvatarFallback className="rounded-lg">K</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold"></span>
-                <span className="truncate text-xs"></span>
+                <span className="truncate font-semibold">KYC</span>
+                <span className="truncate text-xs">Knowledge Management</span>
               </div>
             </>
           )}
